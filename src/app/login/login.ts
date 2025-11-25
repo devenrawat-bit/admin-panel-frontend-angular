@@ -117,7 +117,7 @@ export class Login implements AfterViewInit {
       passwordError.textContent = "Must contain at least 1 special character";
       passwordError.classList.add("visible");
       isValid = false;
-    }
+    } 
 
     if (!isValid) return;
 
