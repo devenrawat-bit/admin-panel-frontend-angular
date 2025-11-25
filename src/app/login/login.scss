@@ -175,6 +175,20 @@ input:focus {
   opacity: 1;
 }
 
+.forgot-password-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #006afc;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.forgot-password-link:hover {
+  color: #0053cc;
+  text-decoration: underline;
+}
+
 .btn {
   width: 100%;
   padding: 12px;

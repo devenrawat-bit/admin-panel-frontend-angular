@@ -1,14 +1,16 @@
 import { Component, AfterViewInit } from '@angular/core';
+import { Auth } from '../auth/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   imports: [],
   templateUrl: './login.html',
-  styleUrl: './login.scss',
+  styleUrls: ['./login.scss'],
 })
 export class Login implements AfterViewInit {
 
-  constructor() {}
+  constructor(private auth: Auth, private router: Router) {}
 
   ngAfterViewInit() {
     // Get form elements
@@ -175,6 +177,16 @@ export class Login implements AfterViewInit {
 
     if (!isValid) return;
 
-    console.log("Payload", { email, password });
+ this.auth.login(email, password).subscribe({
+  next: (response) => {
+    this.auth.storeToken(response);  // backend sends accessToken
+    this.router.navigate(['/dashboard']);
+  },
+  error: (err) => {
+    console.error("Login failed", err);
+  }
+});
+
+
   }
 }
