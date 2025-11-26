@@ -166,14 +166,13 @@ input:focus {
   color: #e63946;
   font-size: 12px;
   margin-top: 4px;
-  display: block;
-  opacity: 0;
-  transition: 0.2s ease;
+  display: none;   /* default: hidden */
 }
 
 .error-text.visible {
-  opacity: 1;
+  display: block;  /* visible when .visible class added */
 }
+
 
 .forgot-password-link {
   display: inline-block;
@@ -215,4 +214,27 @@ input:focus {
   h2 {
     font-size: 22px;
   }
+}
+.error-text {
+color: red;
+font-size: 13px;
+margin-top: 4px;
+display: none;
+}
+
+.login-error {
+  color: #e63946;
+  font-size: 13px;
+  margin-bottom: 12px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background-color: #fee;
+  border-left: 3px solid #e63946;
+  border-radius: 4px;
+  display: none !important;
+  font-weight: 500;
+}
+
+.login-error.visible {
+  display: block !important;
 }

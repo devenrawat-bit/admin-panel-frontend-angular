@@ -1,15 +1,19 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, signal } from '@angular/core';
 import { Auth } from '../auth/auth';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+// import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
 
 @Component({
   selector: 'app-login',
-  imports: [],
+  standalone: true,
+  imports: [FormsModule],
   templateUrl: './login.html',
   styleUrls: ['./login.scss'],
 })
 export class Login implements AfterViewInit {
-
+   errorMessage = signal("");
   constructor(private auth: Auth, private router: Router) {}
 
   ngAfterViewInit() {
@@ -115,6 +119,7 @@ export class Login implements AfterViewInit {
   }
 
   onSubmit(event: Event) {
+    
     event.preventDefault();
 
     const email = (document.getElementById('email') as HTMLInputElement).value.trim();
@@ -135,6 +140,8 @@ export class Login implements AfterViewInit {
     if (!email) {
       emailError.textContent = "Email is required";
       emailError.classList.add("visible");
+      // emailError.style.display = "block";
+
       isValid = false;
     }
     else if (!emailRegex.test(email)) {
@@ -146,6 +153,7 @@ export class Login implements AfterViewInit {
     if (!password) {
       passwordError.textContent = "Password is required";
       passwordError.classList.add("visible");
+      // passwordError.style.display = "block";
       isValid = false;
     }
     else if (password.length < 8 || password.length > 50) {
@@ -178,15 +186,44 @@ export class Login implements AfterViewInit {
     if (!isValid) return;
 
  this.auth.login(email, password).subscribe({
-  next: (response) => {
-    this.auth.storeToken(response);  // backend sends accessToken
+  next: (response: any) => {
+    console.log("Login Success Response:", response);
+    
+    this.auth.storeToken(response.data);
     this.router.navigate(['/dashboard']);
   },
-  error: (err) => {
-    console.error("Login failed", err);
+
+  error: (err: any) => {
+    console.error("Login Error Full Object:", err);
+    console.error("Error Body:", err.error);
+    console.error("Error Status:", err.status);
+    
+    // Handle different error response formats
+    let message = "Invalid email or password";
+    
+    if (err.error) {
+      // If error is an object with message property
+      if (typeof err.error === 'object') {
+        message = err.error.message || err.error.Message || "Invalid email or password";
+      }
+      // If error is a string
+      else if (typeof err.error === 'string') {
+        message = err.error;
+      }
+    }
+    
+    console.log("Final Error Message:", message);
+    this.errorMessage.set(message);
+    console.log("Signal value after set:", this.errorMessage());
+    
+    // Also display error in DOM directly
+    const errorDiv = document.getElementById('loginErrorMessage');
+    if (errorDiv) {
+      errorDiv.textContent = message;
+      errorDiv.classList.add('visible');
+      console.log("Error div updated in DOM");
+    }
   }
 });
-
-
-  }
+}
 }

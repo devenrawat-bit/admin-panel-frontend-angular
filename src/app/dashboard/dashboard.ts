@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrl: './dashboard.scss',
 })
 export class Dashboard {
-
+ name: string = 'Admin Deven Rawat';
 }
