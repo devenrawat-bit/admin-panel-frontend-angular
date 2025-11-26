@@ -1,0 +1,33 @@
+<div class="sidebar" [class.collapsed]="collapsed">
+
+  <!-- PROFILE SECTION -->
+  <div class="profile-section" [class.collapsed]="collapsed">
+    <div class="profile-avatar-wrapper">
+      <img class="profile-avatar" [src]="user.profileImage" [alt]="user.name" />
+    </div>
+
+    <div class="profile-info" *ngIf="!collapsed">
+      <div class="profile-name">{{ user.name }}</div>
+      <div class="profile-role">{{ user.role }}</div>
+    </div>
+  </div>
+
+  <!-- DIVIDER -->
+  <div class="sidebar-divider"></div>
+
+  <!-- MENU ITEMS -->
+  <nav class="menu">
+    <a 
+      *ngFor="let item of menuItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      class="menu-item"
+      [title]="item.label"
+    >
+      <i class="{{ item.icon }}"></i>
+      <span class="menu-label" *ngIf="!collapsed">{{ item.label }}</span>
+    </a>
+  </nav>
+
+</div>
+

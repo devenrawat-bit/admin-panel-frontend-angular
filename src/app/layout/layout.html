@@ -1,0 +1,12 @@
+<div class="layout-wrapper">
+  <!-- Navbar (Fixed at top) -->
+  <app-navbar (toggleSidebar)="toggleSidebar()"></app-navbar>
+
+  <!-- Sidebar (Fixed on left) -->
+  <app-sidebar [collapsed]="sidebarCollapsed"></app-sidebar>
+
+  <!-- Main Content -->
+  <main class="main-content" [class.sidebar-collapsed]="sidebarCollapsed">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [],
+  standalone: true,
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss',
+  styleUrls: ['./dashboard.scss'],
 })
 export class Dashboard {
- name: string = 'Admin Deven Rawat';
-}
+  // name = "Admin Deven Rawat"; 
+ }
