@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Auth } from '../auth/auth';
@@ -9,12 +9,13 @@ import { Auth } from '../auth/auth';
   imports: [CommonModule, RouterModule],
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.scss'],
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class Sidebar implements OnInit {
   @Input() collapsed = false;
 
   user = {
-    name: "Dharmesh",
+    name: "User",
     role: "Admin",
     profileImage: "assets/user.jpg"
   };
@@ -30,13 +31,28 @@ export class Sidebar implements OnInit {
   constructor(private auth: Auth) {}
 
   ngOnInit() {
-    // Load user info from localStorage
+    // Load user info from localStorage immediately
+    this.loadUserData();
+    console.log("Sidebar initialized with user:", this.user);
+  }
+
+  private loadUserData() {
     const fullName = localStorage.getItem('fullName');
     const roles = localStorage.getItem('roles');
     const profileUrl = localStorage.getItem('profileImageUrl');
     
-    if (fullName) this.user.name = fullName;
-    if (roles) this.user.role = roles;
-    if (profileUrl) this.user.profileImage = profileUrl;
+    console.log("Loading sidebar user data from localStorage:", { fullName, roles, profileUrl });
+    
+    if (fullName && fullName.trim()) {
+      this.user.name = fullName;
+    }
+    if (roles && roles.trim()) {
+      this.user.role = roles;
+    }
+    if (profileUrl && profileUrl.trim()) {
+      this.user.profileImage = profileUrl;
+    }
+    
+    console.log("Sidebar user data loaded:", this.user);
   }
 }

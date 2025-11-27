@@ -11,7 +11,7 @@ import { Sidebar } from '../sidebar/sidebar';
   styleUrls: ['./layout.scss'],
 })
 export class Layout {
-  sidebarCollapsed = false;
+  sidebarCollapsed = false; // Start expanded by default
 
   toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed;

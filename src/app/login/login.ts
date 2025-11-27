@@ -187,16 +187,37 @@ export class Login implements AfterViewInit {
 
  this.auth.login(email, password).subscribe({
   next: (response: any) => {
-    console.log("Login Success Response:", response);
+    console.log("=== LOGIN SUCCESS ===");
+    console.log("Full Response:", response);
+    console.log("Response keys:", Object.keys(response));
+    console.log("Response.data:", response.data);
+    console.log("Response.Data:", response.Data);
     
-    this.auth.storeToken(response.data);
-    this.router.navigate(['/dashboard']);
+    // Check if data exists in response
+    const tokenData = response.data || response.Data;
+    
+    if (tokenData) {
+      console.log("Token data found:", tokenData);
+      this.auth.storeToken(tokenData);
+      console.log("Token stored successfully, navigating to dashboard");
+      this.router.navigate(['/dashboard']);
+    } else {
+      console.error("No token data found in response");
+      this.errorMessage.set("Login failed: No token received from server");
+      const errorDiv = document.getElementById('loginErrorMessage');
+      if (errorDiv) {
+        errorDiv.textContent = "Login failed: No token received";
+        errorDiv.classList.add('visible');
+      }
+    }
   },
 
   error: (err: any) => {
-    console.error("Login Error Full Object:", err);
+    console.error("=== LOGIN ERROR ===");
+    console.error("Full Error Object:", err);
     console.error("Error Body:", err.error);
     console.error("Error Status:", err.status);
+    console.error("Error Message:", err.message);
     
     // Handle different error response formats
     let message = "Invalid email or password";
@@ -214,7 +235,6 @@ export class Login implements AfterViewInit {
     
     console.log("Final Error Message:", message);
     this.errorMessage.set(message);
-    console.log("Signal value after set:", this.errorMessage());
     
     // Also display error in DOM directly
     const errorDiv = document.getElementById('loginErrorMessage');
