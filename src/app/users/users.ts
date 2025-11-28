@@ -1,0 +1,203 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink, Router } from '@angular/router';
+import { UserService } from './user.service';
+
+@Component({
+  selector: 'app-users',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './users.html',
+  styleUrls: ['./users.scss'],
+})
+export class Users {
+
+  users: any[] = [];
+
+  // Filters visible in UI
+  filters = {
+    name: '',
+    email: '',
+    phoneNumber: '',
+    role: '',
+    isActive: ''
+  };
+
+  // Pagination
+  page = 1;
+  pageSize = 10;
+  totalItems = 0;
+
+  loading = false;
+
+  constructor(
+    private userService: UserService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.loadUsers();
+  }
+
+  // 👉 FIXED GETTERS (pagination display)
+  get startIndex() {
+    return (this.page - 1) * this.pageSize + 1;
+  }
+
+  get endIndex() {
+    return Math.min(this.page * this.pageSize, this.totalItems);
+  }
+
+ loadUsers() {
+  this.loading = true;
+
+  const payload = {
+    page: this.page,
+    pageSize: this.pageSize,
+    search: "",
+    sortColumn: "",
+    sortDirection: "",
+    filters: {
+      fullName: this.filters.name || "",
+      email: this.filters.email || "",
+      phoneNumber: this.filters.phoneNumber || "",
+      roles: this.filters.role || "",
+      isActive: this.filters.isActive || ""
+    }
+  };
+
+  console.log("🔍 Loading users with payload:", payload);
+
+  this.userService.getUsers(payload).subscribe({
+    next: (response: any) => {
+      console.log("📨 Raw response from backend:", response);
+      console.log("📨 Response type:", typeof response);
+      console.log("📨 Response keys:", Object.keys(response || {}));
+      
+      // Try multiple response structure possibilities
+      let data: any[] = [];
+      let total: number = 0;
+
+      // Structure 1: { data: [], totalCount: number }
+      if (response?.data && Array.isArray(response.data)) {
+        data = response.data;
+        total = response.totalCount || response.totalItems || response.data.length || 0;
+        console.log("✅ Format 1: Using response.data");
+      }
+      // Structure 2: { Data: [], TotalCount: number } (PascalCase)
+      else if (response?.Data && Array.isArray(response.Data)) {
+        data = response.Data;
+        total = response.TotalCount || response.TotalItems || response.Data.length || 0;
+        console.log("✅ Format 2: Using response.Data (PascalCase)");
+      }
+      // Structure 3: { message: { data: [] } }
+      else if (response?.message?.data && Array.isArray(response.message.data)) {
+        data = response.message.data;
+        total = response.message.totalCount || response.message.totalItems || response.message.data.length || 0;
+        console.log("✅ Format 3: Using response.message.data");
+      }
+      // Structure 4: Direct array response
+      else if (Array.isArray(response)) {
+        data = response;
+        total = response.length;
+        console.log("✅ Format 4: Direct array response");
+      }
+      // Structure 5: { success: true, data: [] }
+      else if (response?.success && response?.data && Array.isArray(response.data)) {
+        data = response.data;
+        total = response.totalCount || response.data.length || 0;
+        console.log("✅ Format 5: Using response.data with success flag");
+      }
+
+      console.log("✅ Extracted users:", data);
+      console.log("✅ Total count:", total);
+      
+      this.users = data;
+      this.totalItems = total;
+      this.loading = false;
+    },
+    error: (err: any) => {
+      console.error("❌ Error loading users:", err);
+      console.error("❌ Error status:", err.status);
+      console.error("❌ Error message:", err.message);
+      this.users = [];
+      this.totalItems = 0;
+      this.loading = false;
+    }
+  });
+}
+
+  changePageSize(size: any) {
+    this.pageSize = Number(size);
+    this.page = 1;
+    this.loadUsers();
+  }
+
+  nextPage() {
+    if (this.page * this.pageSize < this.totalItems) {
+      this.page++;
+      this.loadUsers();
+    }
+  }
+
+  prevPage() {
+    if (this.page > 1) {
+      this.page--;
+      this.loadUsers();
+    }
+  }
+
+  clearFilters() {
+    this.filters = {
+      name: '',
+      email: '',
+      phoneNumber: '',
+      role: '',
+      isActive: ''
+    };
+    this.page = 1;
+    this.loadUsers();
+  }
+
+  getRoleDisplay(user: any): string {
+    if (Array.isArray(user.roles)) {
+      return user.roles.join(', ');
+    }
+    return user.roles || '';
+  }
+
+  toggleActive(user: any) {
+    const fd = new FormData();
+
+    fd.append('Email', user.email);
+    fd.append('FullName', user.fullName || '');
+    fd.append('Role', this.getRoleDisplay(user));
+    fd.append('isActive', (!user.isActive).toString());
+    fd.append('PhoneNumber', user.phoneNumber || '');
+    fd.append('DateOfBirth', user.dateOfBirth || '');
+    fd.append('CountryId', user.countryId ?? '');
+    fd.append('StateId', user.stateId ?? '');
+    fd.append('CityId', user.cityId ?? '');
+
+    this.userService.updateUser(fd).subscribe(() => {
+      user.isActive = !user.isActive;
+    });
+  }
+
+  addUser() {
+    this.router.navigate(['/users/add']);
+  }
+
+  editUser(user: any) {
+    this.router.navigate(['/users/edit', user.id]);
+  }
+
+  deleteUser(user: any) {
+    if (!confirm(`Delete user "${user.fullName}" ?`)) return;
+
+    this.userService.deleteUser(user.id).subscribe(() => {
+      this.loadUsers();
+    });
+  }
+}

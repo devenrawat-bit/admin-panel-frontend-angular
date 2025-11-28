@@ -1,0 +1,104 @@
+<!-- src/app/roles/edit-role.html -->
+
+<div class="role-form-page" *ngIf="!loading; else loadingTpl">
+  <div class="breadcrumb">
+    <a routerLink="/roles">Roles</a>
+    <span>/</span>
+    <span>{{ mode === 'add' ? 'Add Role' : 'Edit Role' }}</span>
+  </div>
+
+  <h2 class="page-title">
+    {{ mode === 'add' ? 'Add Role' : 'Edit Role' }}
+  </h2>
+
+  <!-- Top fields -->
+  <div class="top-row">
+    <div class="field">
+      <label>Role Name<span class="required">*</span></label>
+      <input type="text" [(ngModel)]="name" />
+    </div>
+
+    <div class="field">
+      <label>Short Description</label>
+      <input type="text" [(ngModel)]="description" />
+    </div>
+
+    <div class="field">
+      <label>Status</label>
+      <select [(ngModel)]="isActive">
+        <option [ngValue]="true">Active</option>
+        <option [ngValue]="false">Inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="btn" (click)="checkAll()">Check All</button>
+    <button class="btn" (click)="expandAll()">Expand All</button>
+  </div>
+
+  <h3 class="section-title">Permissions*</h3>
+
+  <!-- Permission groups -->
+  <div class="permission-groups">
+    <div
+      class="permission-group"
+      *ngFor="let group of permissionGroups"
+    >
+      <div class="group-header" (click)="toggleGroupCollapse(group)">
+        <div class="left">
+          <span class="group-title">{{ group.label }}</span>
+        </div>
+
+        <div class="right">
+          <label class="group-check">
+            <input
+              type="checkbox"
+              [checked]="isGroupAllChecked(group)"
+              (click)="$event.stopPropagation()"
+              (change)="toggleGroup(group, $event.target.checked)"
+            />
+            <span>Select all</span>
+          </label>
+          <span class="chevron">
+            {{ expandedGroups[group.key] ? '▾' : '▸' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="group-body" *ngIf="expandedGroups[group.key]">
+        <label
+          class="perm-row"
+          *ngFor="let opt of group.items"
+        >
+          <input
+            type="checkbox"
+            [checked]="isPermissionChecked(opt)"
+            (change)="onPermissionToggle(opt, $event.target.checked)"
+          />
+          <span>{{ opt.label }}</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer buttons -->
+  <div class="form-footer">
+    <button class="btn secondary" type="button" (click)="cancel()">
+      Cancel
+    </button>
+    <button
+      class="btn primary"
+      type="button"
+      (click)="save()"
+      [disabled]="saving"
+    >
+      {{ saving ? 'Saving...' : 'Save' }}
+    </button>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading">Loading...</div>
+</ng-template>

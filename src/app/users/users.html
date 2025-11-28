@@ -1,0 +1,115 @@
+<div class="users-page">
+
+  <!-- Page Header -->
+  <div class="users-header">
+    <h2>Users</h2>
+    <button class="btn-add" [routerLink]="['/users/add']">+ Add User</button>
+  </div>
+
+  <!-- Filters Row -->
+  <div class="filters-row">
+
+    <input
+      type="text"
+      placeholder="Search"
+      [(ngModel)]="filters.name"
+      (ngModelChange)="loadUsers()"
+    />
+
+    <input
+      type="text"
+      placeholder="Search"
+      [(ngModel)]="filters.email"
+      (ngModelChange)="loadUsers()"
+    />
+
+    <input
+      type="text"
+      placeholder="Search"
+      [(ngModel)]="filters.phoneNumber"
+      (ngModelChange)="loadUsers()"
+    />
+
+    <input
+      type="text"
+      placeholder="Search"
+      [(ngModel)]="filters.role"
+      (ngModelChange)="loadUsers()"
+    />
+
+    <select [(ngModel)]="filters.isActive" (ngModelChange)="loadUsers()">
+      <option value="">All</option>
+      <option value="true">Active</option>
+      <option value="false">Inactive</option>
+    </select>
+
+    <button class="btn-clear" (click)="clearFilters()">Clear</button>
+    
+  </div>
+
+  <!-- Users Table -->
+  <table class="users-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone Number</th>
+        <th>Role</th>
+        <th>Is Active?</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let user of users">
+        <td>{{ user.fullName }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.phoneNumber || '-' }}</td>
+        <td>{{ getRoleDisplay(user) }}</td>
+
+        <td>
+          <label class="switch">
+            <input
+              type="checkbox"
+              [checked]="user.isActive"
+              (change)="toggleActive(user)"
+            />
+            <span class="slider"></span>
+          </label>
+        </td>
+
+        <td class="actions">
+          <button class="edit-btn" (click)="editUser(user)">✏️</button>
+          <button class="delete-btn" (click)="deleteUser(user)">🗑️</button>
+        </td>
+      </tr>
+
+      <tr *ngIf="users.length === 0">
+        <td colspan="6" class="no-data">No users found</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <div class="pagination">
+
+    <div class="page-info">
+      {{ startIndex }} – {{ endIndex }} of {{ totalItems }}
+    </div>
+
+    <div class="page-controls">
+      <button (click)="prevPage()" [disabled]="page === 1">‹</button>
+
+      <button (click)="nextPage()" [disabled]="page * pageSize >= totalItems">›</button>
+
+     <select [(ngModel)]="pageSize" (change)="changePageSize(+pageSize)">
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="20">20</option>
+        <option [value]="50">50</option>
+      </select>
+    </div>
+
+  </div>
+
+</div>

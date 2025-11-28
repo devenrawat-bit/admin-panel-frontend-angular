@@ -1,0 +1,107 @@
+<!-- src/app/roles/roles.html -->
+<div class="roles-page">
+
+  <div class="roles-header">
+    <h2>Roles</h2>
+
+    <button class="btn-add" (click)="goToAdd()">+ Add Role</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-row">
+    <input
+      type="text"
+      placeholder="Search name"
+      [(ngModel)]="searchName"
+      (ngModelChange)="onFilterChange()"
+    />
+
+    <input
+      type="text"
+      placeholder="Search description"
+      [(ngModel)]="searchDescription"
+      (ngModelChange)="onFilterChange()"
+    />
+
+    <select [(ngModel)]="searchActive" (ngModelChange)="onFilterChange()">
+      <option value="">All</option>
+      <option value="true">Active</option>
+      <option value="false">Inactive</option>
+    </select>
+
+    <button class="btn-clear" (click)="clearFilters()">Clear</button>
+  </div>
+
+  <!-- Table -->
+  <table class="roles-table" *ngIf="!loading; else loadingTpl">
+    <thead>
+      <tr>
+        <th (click)="sortBy('name')">
+          Name
+          <span class="sort-icon">{{ getSortIcon('name') }}</span>
+        </th>
+        <th (click)="sortBy('description')">
+          Short Description
+          <span class="sort-icon">{{ getSortIcon('description') }}</span>
+        </th>
+        <th (click)="sortBy('isActive')">
+          Is Active?
+          <span class="sort-icon">{{ getSortIcon('isActive') }}</span>
+        </th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let role of roles">
+        <td>{{ role.name }}</td>
+        <td>{{ role.description || '-' }}</td>
+
+        <td>
+          <label class="switch">
+            <input
+              type="checkbox"
+              [checked]="role.isActive"
+              (change)="toggleActive(role)"
+            />
+            <span class="slider"></span>
+          </label>
+        </td>
+
+        <td class="actions">
+          <button class="edit-btn" (click)="goToEdit(role)">✏️</button>
+          <button class="delete-btn" (click)="deleteRole(role)">🗑️</button>
+        </td>
+      </tr>
+
+      <tr *ngIf="roles.length === 0">
+        <td colspan="4" class="no-data">No roles found</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #loadingTpl>
+    <div class="loading">Loading roles...</div>
+  </ng-template>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalItems > 0">
+    <div class="page-info">
+      {{ startIndex }} – {{ endIndex }} of {{ totalItems }}
+    </div>
+
+    <div class="page-controls">
+      <button (click)="prevPage()" [disabled]="page === 1">‹</button>
+      <button (click)="nextPage()" [disabled]="page * pageSize >= totalItems">
+        ›
+      </button>
+
+      <select [(ngModel)]="pageSize" (change)="changePageSize(pageSize)">
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="20">20</option>
+        <option [value]="50">50</option>
+      </select>
+    </div>
+  </div>
+</div>

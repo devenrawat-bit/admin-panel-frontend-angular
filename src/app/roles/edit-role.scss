@@ -1,0 +1,171 @@
+/* src/app/roles/edit-role.scss */
+
+.role-form-page {
+  padding: 20px;
+}
+
+.breadcrumb {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 6px;
+
+  a {
+    color: #4c8bf5;
+    text-decoration: none;
+  }
+
+  span {
+    margin: 0 4px;
+  }
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.top-row {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1.5fr;
+  gap: 14px;
+  margin-bottom: 18px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: 13px;
+    margin-bottom: 4px;
+
+    .required {
+      color: #e63946;
+      margin-left: 2px;
+    }
+  }
+
+  input,
+  select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+}
+
+.toolbar {
+  margin-bottom: 12px;
+
+  .btn {
+    margin-right: 8px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #f6f6f6;
+    cursor: pointer;
+    font-size: 13px;
+  }
+}
+
+.section-title {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.permission-groups {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  padding: 6px 0;
+}
+
+.permission-group + .permission-group {
+  border-top: 1px solid #eee;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  cursor: pointer;
+
+  .group-title {
+    font-weight: 500;
+  }
+
+  .group-check {
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    input {
+      margin: 0;
+    }
+  }
+
+  .chevron {
+    margin-left: 10px;
+    font-size: 14px;
+  }
+
+  .right {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.group-body {
+  padding: 6px 24px 10px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 4px 16px;
+}
+
+.perm-row {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  input {
+    margin: 0;
+  }
+}
+
+.form-footer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .primary {
+    background: #4c8bf5;
+    color: white;
+  }
+
+  .secondary {
+    background: #f0f0f0;
+    color: #333;
+  }
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
+}

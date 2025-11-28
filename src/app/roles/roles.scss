@@ -1,0 +1,177 @@
+/* src/app/roles/roles.scss */
+
+.roles-page {
+  padding: 20px;
+}
+
+.roles-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h2 {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .btn-add {
+    background: #4c8bf5;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1fr auto;
+  gap: 10px;
+  margin-bottom: 15px;
+
+  input,
+  select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+
+  .btn-clear {
+    background: #e2e2e2;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.roles-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+
+  th {
+    text-align: left;
+    padding: 12px;
+    background: #f8f8f8;
+    cursor: pointer;
+
+    .sort-icon {
+      font-size: 12px;
+      margin-left: 4px;
+      color: #888;
+    }
+  }
+
+  td {
+    padding: 12px;
+    border-top: 1px solid #eee;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 20px;
+  }
+}
+
+.actions button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.edit-btn {
+  color: #4c8bf5;
+  margin-right: 6px;
+}
+
+.delete-btn {
+  color: #d9534f;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .page-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    button {
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+    }
+
+    select {
+      padding: 6px;
+      border-radius: 4px;
+    }
+  }
+}
+
+/* Toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #ccc;
+    border-radius: 34px;
+    transition: 0.2s;
+  }
+
+  .slider::before {
+    position: absolute;
+    content: '';
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+
+  input:checked + .slider {
+    background-color: #4c8bf5;
+  }
+
+  input:checked + .slider::before {
+    transform: translateX(20px);
+  }
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
+  font-size: 16px;
+  color: #666;
+}

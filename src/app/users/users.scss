@@ -1,0 +1,139 @@
+.users-page {
+  padding: 20px;
+}
+
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h2 {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .btn-add {
+    background: #4c8bf5;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+
+  input, select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+
+  .btn-clear {
+    background: #e2e2e2;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+
+  th {
+    text-align: left;
+    padding: 12px;
+    background: #f8f8f8;
+  }
+
+  td {
+    padding: 12px;
+    border-top: 1px solid #eee;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 20px;
+  }
+}
+
+.actions button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.edit-btn { color: #4c8bf5; }
+.delete-btn { color: #d9534f; }
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .page-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    button {
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+    }
+
+    select {
+      padding: 6px;
+      border-radius: 4px;
+    }
+  }
+}
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+
+  input {
+    opacity: 0;
+    width: 0; height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    width: 40px; height: 20px;
+    background: #ccc;
+    border-radius: 20px;
+    transition: .2s;
+  }
+
+  input:checked + .slider {
+    background: #4c8bf5;
+  }
+
+  .slider::before {
+    content: "";
+    position: absolute;
+    height: 16px; width: 16px;
+    left: 2px; bottom: 2px;
+    background: white;
+    border-radius: 50%;
+    transition: .2s;
+  }
+
+  input:checked + .slider::before {
+    transform: translateX(20px);
+  }
+}

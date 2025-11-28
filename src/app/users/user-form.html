@@ -1,0 +1,160 @@
+<div class="user-form-page" *ngIf="!loading; else loadingTpl">
+
+  <h2>{{ mode === 'add' ? 'Add User' : 'Edit User' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="user-form">
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Full Name<span class="required">*</span></label>
+        <input type="text"
+               formControlName="fullName"
+               placeholder="Enter full name"
+               (keypress)="allowOnlyLetters($event)"
+               [class.error]="hasError('fullName', 'required') ||
+                              hasError('fullName', 'minlength') ||
+                              hasError('fullName','maxlength') ||
+                              hasError('fullName','pattern')">
+
+        <div class="error-text" *ngIf="hasError('fullName', 'required')">Full Name is required</div>
+        <div class="error-text" *ngIf="hasError('fullName', 'minlength')">Full Name must be at least 2 characters</div>
+        <div class="error-text" *ngIf="hasError('fullName', 'maxlength')">Full Name cannot exceed 100 characters</div>
+        <div class="error-text" *ngIf="hasError('fullName','pattern')">Full Name can only contain letters and spaces</div>
+      </div>
+
+      <div class="form-field">
+        <label>Email<span class="required">*</span></label>
+        <input type="email"
+               formControlName="email"
+               placeholder="Enter email"
+               [readonly]="mode === 'edit'"
+               [class.error]="hasError('email', 'required') || hasError('email', 'pattern')">
+
+        <div class="error-text" *ngIf="hasError('email', 'required')">Email is required</div>
+        <div class="error-text" *ngIf="hasError('email', 'pattern')">Enter a valid email</div>
+      </div>
+
+      <div class="form-field" *ngIf="mode === 'add'">
+        <label>Password<span class="required">*</span></label>
+        <input type="password"
+               formControlName="password"
+               placeholder="Enter password"
+               [class.error]="hasError('password', 'required') || hasError('password', 'pattern')">
+
+        <div class="error-text" *ngIf="hasError('password', 'required')">Password is required</div>
+        <div class="error-text" *ngIf="hasError('password','pattern')">
+          Password must be 8–50 chars with 1 uppercase, 1 number, 1 special character.
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Phone Number</label>
+        <input type="text"
+               formControlName="phoneNumber"
+               placeholder="10-15 digits"
+               (keypress)="allowOnlyNumbers($event)"
+               [class.error]="hasError('phoneNumber', 'pattern')">
+
+        <div class="error-text" *ngIf="hasError('phoneNumber', 'pattern')">
+          Phone must be 10–15 digits
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Role<span class="required">*</span></label>
+        <select formControlName="role" [class.error]="hasError('role', 'required')">
+          <option value="">Select role</option>
+          <option *ngFor="let r of roles" [value]="r.name">{{ r.name }}</option>
+        </select>
+        <div class="error-text" *ngIf="hasError('role', 'required')">Role is required</div>
+      </div>
+
+      <div class="form-field">
+        <label>Status<span class="required">*</span></label>
+        <select formControlName="isActive">
+          <option [ngValue]="true">Active</option>
+          <option [ngValue]="false">Inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Date of Birth</label>
+        <input type="date"
+               formControlName="dateOfBirth"
+               [class.error]="hasError('dateOfBirth', 'minAge')">
+
+        <div class="error-text" *ngIf="hasError('dateOfBirth', 'minAge')">
+          User must be at least 18 years old
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Country<span class="required">*</span></label>
+        <select formControlName="countryId"
+                (change)="onCountryChange($event)"
+                [class.error]="hasError('countryId', 'required')">
+          <option [ngValue]="null">Select country</option>
+          <option *ngFor="let c of countries" [value]="c.id">{{ c.name }}</option>
+        </select>
+        <div class="error-text" *ngIf="hasError('countryId', 'required')">Country is required</div>
+      </div>
+
+      <div class="form-field">
+        <label>State<span class="required">*</span></label>
+        <select formControlName="stateId"
+                (change)="onStateChange($event)"
+                [class.error]="hasError('stateId', 'required')">
+          <option [ngValue]="null">Select state</option>
+          <option *ngFor="let s of states" [value]="s.id">{{ s.name }}</option>
+        </select>
+        <div class="error-text" *ngIf="hasError('stateId', 'required')">State is required</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>City<span class="required">*</span></label>
+        <select formControlName="cityId" [class.error]="hasError('cityId', 'required')">
+          <option [ngValue]="null">Select city</option>
+          <option *ngFor="let c of cities" [value]="c.id">{{ c.name }}</option>
+        </select>
+        <div class="error-text" *ngIf="hasError('cityId', 'required')">
+          City is required
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Profile Image (Max 5MB)</label>
+        <input type="file" (change)="onFileChange($event)" accept="image/*">
+        <div class="error-text" *ngIf="imageSizeError">{{ imageSizeError }}</div>
+      </div>
+
+      <div class="form-field avatar-preview">
+        <div class="avatar" *ngIf="previewUrl; else noImg">
+          <img [src]="previewUrl" alt="Profile Preview">
+        </div>
+
+        <ng-template #noImg>
+          <div class="avatar placeholder">👤</div>
+        </ng-template>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn primary" [disabled]="saving || form.invalid">
+        {{ saving ? 'Saving...' : 'Submit' }}
+      </button>
+      <button type="button" class="btn secondary" (click)="cancel()">Cancel</button>
+    </div>
+
+  </form>
+
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading">Loading user...</div>
+</ng-template>
