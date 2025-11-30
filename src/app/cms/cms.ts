@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CmsService, CmsDto } from './cms.service';
 
 @Component({
   selector: 'app-cms',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cms.html',
   styleUrls: ['./cms.scss'],
 })
@@ -24,6 +24,10 @@ export class CmsList {
   page = 1;
   pageSize = 10;
   totalItems = 0;
+
+  // sorting - default to CreatedAt descending (newest first)
+  sortColumn = 'CreatedAt';
+  sortDirection: 'asc' | 'desc' = 'desc';
 
   loading = false;
 
@@ -46,6 +50,8 @@ export class CmsList {
       searchKey: this.searchKey.trim(),
       searchMetaKeyword: this.searchMetaKeyword.trim(),
       searchIsActive: this.searchIsActive, // '', 'true', 'false'
+      sortColumn: this.sortColumn,
+      sortDirection: this.sortDirection,
     };
 
     this.cmsService.getCmsList(payload).subscribe({
@@ -77,6 +83,22 @@ export class CmsList {
     this.searchIsActive = '';
     this.page = 1;
     this.loadCms();
+  }
+
+  // Sorting methods
+  sortBy(column: string) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.loadCms();
+  }
+
+  getSortIcon(column: string): string {
+    if (this.sortColumn !== column) return '⇅';
+    return this.sortDirection === 'asc' ? '↑' : '↓';
   }
 
   // pagination helpers

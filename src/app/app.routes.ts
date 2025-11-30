@@ -21,6 +21,10 @@ import { EditRole } from './roles/edit-role';
 import { CmsList } from './cms/cms';
 import { CmsForm } from './cms/cms-form';
 
+// FAQ
+import { Faq } from './faq/faq';
+import { FaqForm } from './faq/faq-form';
+
 
 export const routes: Routes = [
   // -----------------------------
@@ -59,7 +63,12 @@ export const routes: Routes = [
       //cms
        { path: 'cms', component: CmsList },
        { path: 'cms/add', component: CmsForm },
-       { path: 'cms/edit/:id', component: CmsForm }
+       { path: 'cms/edit/:id', component: CmsForm },
+
+      // FAQ
+      { path: 'faq', component: Faq },
+      { path: 'faq/add', component: FaqForm },
+      { path: 'faq/edit/:id', component: FaqForm }
     ],
   },
 

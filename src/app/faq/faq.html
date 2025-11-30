@@ -1,1 +1,99 @@
-<p>faq works!</p>
+<div class="faq-page">
+  <!-- Page Header -->
+  <div class="faq-header">
+    <h2>FAQ List</h2>
+    <button class="btn-add" (click)="goToAdd()">
+      <i class="fa-solid fa-plus"></i> Add FAQ
+    </button>
+  </div>
+
+  <!-- Filters Row -->
+  <div class="filters-row">
+    <input
+      type="text"
+      placeholder="Search Question"
+      [(ngModel)]="searchQuestion"
+      (ngModelChange)="onFilterChange()"
+    />
+
+    <select [(ngModel)]="searchIsActive" (ngModelChange)="onFilterChange()">
+      <option value="">All Status</option>
+      <option value="true">Active</option>
+      <option value="false">Inactive</option>
+    </select>
+
+    <button class="btn-clear" (click)="clearFilters()">Clear</button>
+  </div>
+
+  <!-- FAQ Table -->
+  <table class="faq-table" *ngIf="!loading; else loadingTpl">
+    <thead>
+      <tr>
+        <th (click)="sortBy('question')">
+          Question
+          <span class="sort-icon">{{ getSortIcon('question') }}</span>
+        </th>
+        <th (click)="sortBy('isActive')">
+          Is Active?
+          <span class="sort-icon">{{ getSortIcon('isActive') }}</span>
+        </th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let faq of faqs">
+        <td class="question-cell">{{ faq.question }}</td>
+
+        <td>
+          <label class="switch">
+            <input
+              type="checkbox"
+              [checked]="faq.isActive"
+              (change)="toggleActive(faq)"
+            />
+            <span class="slider"></span>
+          </label>
+        </td>
+
+        <td class="actions">
+          <button class="edit-btn" (click)="goToEdit(faq)" title="Edit">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+          <button class="delete-btn" (click)="deleteFaq(faq)" title="Delete">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="faqs.length === 0">
+        <td colspan="3" class="no-data">No FAQs found</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #loadingTpl>
+    <div class="loading">Loading FAQs...</div>
+  </ng-template>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalItems > 0">
+    <div class="page-info">
+      {{ startIndex }} – {{ endIndex }} of {{ totalItems }}
+    </div>
+
+    <div class="page-controls">
+      <button (click)="prevPage()" [disabled]="page === 1">‹</button>
+      <button (click)="nextPage()" [disabled]="page * pageSize >= totalItems">
+        ›
+      </button>
+
+      <select [(ngModel)]="pageSize" (change)="changePageSize(pageSize)">
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="20">20</option>
+        <option [value]="50">50</option>
+      </select>
+    </div>
+  </div>
+</div>

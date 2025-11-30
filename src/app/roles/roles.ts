@@ -25,9 +25,9 @@ export class Roles {
   pageSize = 10;
   totalItems = 0;
 
-  // sorting
-  sortColumn: string = 'name';
-  sortDirection: 'asc' | 'desc' = 'asc';
+  // sorting - default to CreatedAt descending (newest first)
+  sortColumn: string = 'CreatedAt';
+  sortDirection: 'asc' | 'desc' = 'desc';
 
   loading = false;
 

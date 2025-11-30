@@ -2,15 +2,15 @@
   display: flex;
   width: 100%;
   min-height: 100vh;
-  background: #f5f6fa;
+  background: var(--bg-primary);
 }
 
 .main-content {
   flex: 1;
   margin-left: 260px;
   margin-top: 70px;
-  transition: all 0.3s ease;
-  padding: 20px;
+  transition: all var(--transition-slow);
+  padding: 32px;
   min-height: calc(100vh - 70px);
   overflow-y: auto;
 
@@ -34,7 +34,7 @@
   .main-content {
     margin-left: 0;
     margin-top: 60px;
-    padding: 15px;
+    padding: 20px;
     min-height: calc(100vh - 60px);
   }
 }
@@ -42,7 +42,7 @@
 @media (max-width: 480px) {
   .main-content {
     margin-top: 55px;
-    padding: 12px;
+    padding: 16px;
     min-height: calc(100vh - 55px);
   }
 }

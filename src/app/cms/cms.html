@@ -48,10 +48,22 @@
             </th>
           </tr>
           <tr>
-            <th>Title</th>
-            <th>Key</th>
-            <th>Meta Keyword</th>
-            <th>Is Active?</th>
+            <th (click)="sortBy('Title')">
+              Title
+              <span class="sort-icon">{{ getSortIcon('Title') }}</span>
+            </th>
+            <th (click)="sortBy('Key')">
+              Key
+              <span class="sort-icon">{{ getSortIcon('Key') }}</span>
+            </th>
+            <th (click)="sortBy('MetaKeyword')">
+              Meta Keyword
+              <span class="sort-icon">{{ getSortIcon('MetaKeyword') }}</span>
+            </th>
+            <th (click)="sortBy('IsActive')">
+              Is Active?
+              <span class="sort-icon">{{ getSortIcon('IsActive') }}</span>
+            </th>
             <th>Action</th>
           </tr>
         </thead>

@@ -29,6 +29,10 @@ export class Users {
   pageSize = 10;
   totalItems = 0;
 
+  // Sorting - default to CreatedAt descending (newest first)
+  sortColumn = 'CreatedAt';
+  sortDirection: 'asc' | 'desc' = 'desc';
+
   loading = false;
 
   constructor(
@@ -56,8 +60,8 @@ export class Users {
     page: this.page,
     pageSize: this.pageSize,
     search: "",
-    sortColumn: "",
-    sortDirection: "",
+    sortColumn: this.sortColumn,
+    sortDirection: this.sortDirection,
     filters: {
       fullName: this.filters.name || "",
       email: this.filters.email || "",
@@ -158,6 +162,22 @@ export class Users {
     };
     this.page = 1;
     this.loadUsers();
+  }
+
+  // Sorting methods
+  sortBy(column: string) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.loadUsers();
+  }
+
+  getSortIcon(column: string): string {
+    if (this.sortColumn !== column) return '⇅';
+    return this.sortDirection === 'asc' ? '↑' : '↓';
   }
 
   getRoleDisplay(user: any): string {

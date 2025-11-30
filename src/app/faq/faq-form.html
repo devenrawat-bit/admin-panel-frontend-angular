@@ -1,0 +1,63 @@
+<div class="faq-form-page" *ngIf="!loading; else loadingTpl">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a routerLink="/faq">FAQ</a>
+    <span>/</span>
+    <span>{{ mode === 'add' ? 'Add FAQ' : 'Edit FAQ' }}</span>
+  </div>
+
+  <h2>{{ mode === 'add' ? 'Add FAQ' : 'Edit FAQ' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="faq-form">
+    <!-- Question Field -->
+    <div class="form-field">
+      <label>Question<span class="required">*</span></label>
+      <input
+        type="text"
+        formControlName="question"
+        placeholder="Enter question"
+        [class.error]="hasError('question')"
+      />
+      <div class="error-text" *ngIf="hasError('question')">
+        Question is required
+      </div>
+    </div>
+
+    <!-- Answer Field with CKEditor -->
+    <div class="form-field">
+      <label>Answer<span class="required">*</span></label>
+      <ckeditor
+        [editor]="Editor"
+        [config]="editorConfig"
+        formControlName="answer"
+        (ready)="onEditorReady($event)"
+      ></ckeditor>
+      <div class="error-text" *ngIf="hasError('answer')">
+        Answer is required
+      </div>
+    </div>
+
+    <!-- Status Field -->
+    <div class="form-field status-field">
+      <label>Status<span class="required">*</span></label>
+      <select formControlName="isActive">
+        <option [ngValue]="true">Active</option>
+        <option [ngValue]="false">Inactive</option>
+      </select>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn secondary" (click)="cancel()">
+        Cancel
+      </button>
+      <button type="submit" class="btn primary" [disabled]="saving || form.invalid">
+        {{ saving ? 'Saving...' : 'Submit' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading">Loading FAQ...</div>
+</ng-template>

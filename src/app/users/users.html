@@ -51,11 +51,26 @@
   <table class="users-table">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone Number</th>
-        <th>Role</th>
-        <th>Is Active?</th>
+        <th (click)="sortBy('FullName')">
+          Name
+          <span class="sort-icon">{{ getSortIcon('FullName') }}</span>
+        </th>
+        <th (click)="sortBy('Email')">
+          Email
+          <span class="sort-icon">{{ getSortIcon('Email') }}</span>
+        </th>
+        <th (click)="sortBy('PhoneNumber')">
+          Phone Number
+          <span class="sort-icon">{{ getSortIcon('PhoneNumber') }}</span>
+        </th>
+        <th (click)="sortBy('Roles')">
+          Role
+          <span class="sort-icon">{{ getSortIcon('Roles') }}</span>
+        </th>
+        <th (click)="sortBy('IsActive')">
+          Is Active?
+          <span class="sort-icon">{{ getSortIcon('IsActive') }}</span>
+        </th>
         <th>Action</th>
       </tr>
     </thead>

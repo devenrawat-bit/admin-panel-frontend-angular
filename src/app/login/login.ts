@@ -55,7 +55,7 @@ export class Login implements AfterViewInit {
       });
     }
 
-    // Validate password on blur (clicking outside)
+    // Validate password on blur (clicking outside) - Simple validation for login
     if (passwordInput) {
       passwordInput.addEventListener('blur', () => {
         const password = passwordInput.value.trim();
@@ -65,21 +65,6 @@ export class Login implements AfterViewInit {
 
         if (!password) {
           passwordError.textContent = "Password is required";
-          passwordError.classList.add("visible");
-        } else if (password.length < 8 || password.length > 50) {
-          passwordError.textContent = "Password must be 8–50 characters";
-          passwordError.classList.add("visible");
-        } else if (!/[A-Z]/.test(password)) {
-          passwordError.textContent = "Must contain at least 1 uppercase letter";
-          passwordError.classList.add("visible");
-        } else if (!/[a-z]/.test(password)) {
-          passwordError.textContent = "Must contain at least 1 lowercase letter";
-          passwordError.classList.add("visible");
-        } else if (!/[0-9]/.test(password)) {
-          passwordError.textContent = "Must contain at least 1 number";
-          passwordError.classList.add("visible");
-        } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-          passwordError.textContent = "Must contain at least 1 special character";
           passwordError.classList.add("visible");
         }
       });
@@ -152,33 +137,6 @@ export class Login implements AfterViewInit {
 
     if (!password) {
       passwordError.textContent = "Password is required";
-      passwordError.classList.add("visible");
-      // passwordError.style.display = "block";
-      isValid = false;
-    }
-    else if (password.length < 8 || password.length > 50) {
-      passwordError.textContent = "Password must be 8–50 characters";
-      passwordError.classList.add("visible");
-      isValid = false;
-    }
-    else if (!/[A-Z]/.test(password)) {
-      passwordError.textContent = "Must contain at least 1 uppercase letter";
-      passwordError.classList.add("visible");
-      isValid = false;
-    }
-    
-    else if (!/[a-z]/.test(password)) {
-      passwordError.textContent = "Must contain at least 1 lowercase letter";
-      passwordError.classList.add("visible");
-      isValid = false;
-    }
-    else if (!/[0-9]/.test(password)) {
-      passwordError.textContent = "Must contain at least 1 number";
-      passwordError.classList.add("visible");
-      isValid = false;
-    }
-    else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      passwordError.textContent = "Must contain at least 1 special character";
       passwordError.classList.add("visible");
       isValid = false;
     }
