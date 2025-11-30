@@ -1,0 +1,131 @@
+.cms-form-page {
+  padding: 24px;
+}
+
+.form-header {
+  margin-bottom: 16px;
+
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+
+    span {
+      color: #ef4444;
+    }
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    outline: none;
+
+    &:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.form-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  border-radius: 8px;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+
+  &.btn-primary {
+    background: #3b82f6;
+    color: white;
+
+    &:hover {
+      background: #2563eb;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+
+  &.btn-light {
+    background: #e5e7eb;
+    color: #374151;
+
+    &:hover {
+      background: #d1d5db;
+    }
+  }
+}
+
+.error {
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 2px;
+}
+
+/* Make CKEditor bigger and handle invalid state */
+::ng-deep .ck-editor__editable_inline {
+  min-height: 250px;
+  background: white;
+  color: #1f2937;
+}
+
+::ng-deep .ck-editor__main {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+::ng-deep .ck.ck-editor__main>.ck-editor__editable:not(.ck-focused) {
+  border-color: #d1d5db;
+}
+
+::ng-deep .ck.ck-editor__main>.ck-editor__editable.ck-focused {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+::ng-deep .ck-content {
+  color: #1f2937;
+}
+
+::ng-deep .ck-editor__editable {
+  color: #1f2937;
+}
+
+@media (max-width: 768px) {
+  .cms-form-page {
+    padding: 12px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

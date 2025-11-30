@@ -17,6 +17,11 @@ import { UserForm } from './users/user-form';
 import { Roles } from './roles/roles';
 import { EditRole } from './roles/edit-role';
 
+//cms
+import { CmsList } from './cms/cms';
+import { CmsForm } from './cms/cms-form';
+
+
 export const routes: Routes = [
   // -----------------------------
   // LOGIN STAYS OUTSIDE LAYOUT
@@ -50,6 +55,11 @@ export const routes: Routes = [
       { path: 'roles', component: Roles },
       { path: 'roles/add', component: EditRole },
       { path: 'roles/edit/:id', component: EditRole },
+
+      //cms
+       { path: 'cms', component: CmsList },
+       { path: 'cms/add', component: CmsForm },
+       { path: 'cms/edit/:id', component: CmsForm }
     ],
   },
 

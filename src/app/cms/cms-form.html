@@ -1,0 +1,100 @@
+<div class="cms-container">
+  <h2>{{ mode === 'add' ? 'Add CMS' : 'Edit CMS' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+
+    <!-- KEY -->
+    <div class="form-group">
+      <label>Key*</label>
+      <input
+        type="text"
+        formControlName="key"
+        class="form-control"
+        [ngClass]="{
+          'is-invalid': form['controls']['key'].touched &&
+                        form['controls']['key'].invalid
+        }"
+      />
+
+      <div class="error" *ngIf="form['controls']['key'].touched &&
+                               form['controls']['key'].invalid">
+        Key is required
+      </div>
+    </div>
+
+    <!-- TITLE -->
+    <div class="form-group">
+      <label>Title*</label>
+      <input
+        type="text"
+        formControlName="title"
+        class="form-control"
+        [ngClass]="{
+          'is-invalid': form['controls']['title'].touched &&
+                        form['controls']['title'].invalid
+        }"
+      />
+
+      <div class="error" *ngIf="form['controls']['title'].touched &&
+                               form['controls']['title'].invalid">
+        Title is required
+      </div>
+    </div>
+
+    <!-- META KEYWORD -->
+    <div class="form-group">
+      <label>Meta Keyword*</label>
+      <input
+        type="text"
+        formControlName="metaKeyword"
+        class="form-control"
+        [ngClass]="{
+          'is-invalid': form['controls']['metaKeyword'].touched &&
+                        form['controls']['metaKeyword'].invalid
+        }"
+      />
+
+      <div class="error" *ngIf="form['controls']['metaKeyword'].touched &&
+                               form['controls']['metaKeyword'].invalid">
+        Meta keyword is required
+      </div>
+    </div>
+
+    <!-- STATUS -->
+    <div class="form-group">
+      <label>Status*</label>
+      <select formControlName="isActive" class="form-control">
+        <option [value]="true">Active</option>
+        <option [value]="false">Inactive</option>
+      </select>
+    </div>
+
+    <!-- CONTENT (CKEditor) -->
+    <div class="form-group">
+      <label>Content*</label>
+
+      <ckeditor
+        [editor]="Editor"
+        [config]="editorConfig"
+        formControlName="content"
+        (ready)="onEditorReady($event)"
+      ></ckeditor>
+
+      <div class="error" *ngIf="form['controls']['content'].touched &&
+                               form['controls']['content'].invalid">
+        Content is required
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="btn-row">
+      <button type="button" class="btn btn-secondary" (click)="cancel()">
+        Cancel
+      </button>
+
+      <button type="submit" class="btn btn-primary" [disabled]="saving">
+        {{ saving ? 'Saving...' : mode === 'add' ? 'Create' : 'Update' }}
+      </button>
+    </div>
+  </form>
+</div>

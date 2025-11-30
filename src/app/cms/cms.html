@@ -1,1 +1,117 @@
-<p>cms works!</p>
+<div class="cms-page">
+  <div class="cms-header">
+    <h2>CMS List</h2>
+    <button class="btn btn-primary" (click)="goToAdd()">+ Add CMS</button>
+  </div>
+
+  <div class="card">
+    <div class="table-wrapper">
+      <table class="cms-table">
+        <thead>
+          <tr class="filter-row">
+            <th>
+              <input
+                type="text"
+                placeholder="Search"
+                [(ngModel)]="searchTitle"
+                (ngModelChange)="onFilterChange()"
+              />
+            </th>
+            <th>
+              <input
+                type="text"
+                placeholder="Search"
+                [(ngModel)]="searchKey"
+                (ngModelChange)="onFilterChange()"
+              />
+            </th>
+            <th>
+              <input
+                type="text"
+                placeholder="Search"
+                [(ngModel)]="searchMetaKeyword"
+                (ngModelChange)="onFilterChange()"
+              />
+            </th>
+            <th>
+              <select
+                [(ngModel)]="searchIsActive"
+                (ngModelChange)="onFilterChange()"
+              >
+                <option value="">All</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </th>
+            <th class="filter-actions">
+              <button class="btn btn-light" (click)="clearFilters()">✕</button>
+            </th>
+          </tr>
+          <tr>
+            <th>Title</th>
+            <th>Key</th>
+            <th>Meta Keyword</th>
+            <th>Is Active?</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="5" class="text-center">Loading...</td>
+          </tr>
+
+          <tr *ngIf="!loading && cmsItems.length === 0">
+            <td colspan="5" class="text-center">No records found</td>
+          </tr>
+
+          <tr *ngFor="let item of cmsItems">
+            <td>{{ item.title }}</td>
+            <td>{{ item.key }}</td>
+            <td>{{ item.metaKeyword }}</td>
+            <td>
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  [checked]="item.isActive"
+                  (change)="toggleActive(item)"
+                />
+                <span class="slider round"></span>
+              </label>
+            </td>
+            <td class="actions">
+              <button class="icon-btn" (click)="goToEdit(item)">
+                ✏️
+              </button>
+              <button class="icon-btn danger" (click)="deleteCms(item)">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer" *ngIf="totalItems > 0">
+      <div class="info">
+        {{ startIndex }} – {{ endIndex }} of {{ totalItems }}
+      </div>
+
+      <div class="pagination-controls">
+        <button (click)="prevPage()" [disabled]="page === 1">&lt;</button>
+        <button
+          (click)="nextPage()"
+          [disabled]="page * pageSize >= totalItems"
+        >
+          &gt;
+        </button>
+
+        <select [ngModel]="pageSize" (ngModelChange)="changePageSize($event)">
+          <option [ngValue]="5">5</option>
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="20">20</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
