@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { UserService } from './user.service';
 import { ModalService } from '../shared/modal/modal.service';
+import { ToastService } from '../shared/toast/toast.service';
 
 @Component({
   selector: 'app-users',
@@ -38,7 +39,8 @@ export class Users {
   constructor(
     private userService: UserService,
     private router: Router,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -189,9 +191,11 @@ export class Users {
   }
 
   toggleActive(user: any) {
+    console.log('🔄 Toggling user active status:', user);
+    
     const fd = new FormData();
-
-    fd.append('Email', user.email);
+    
+    fd.append('Email', user.email || '');
     fd.append('FullName', user.fullName || '');
     fd.append('Role', this.getRoleDisplay(user));
     fd.append('isActive', (!user.isActive).toString());
@@ -201,8 +205,23 @@ export class Users {
     fd.append('StateId', user.stateId ?? '');
     fd.append('CityId', user.cityId ?? '');
 
-    this.userService.updateUser(fd).subscribe(() => {
-      user.isActive = !user.isActive;
+    console.log('📤 Sending update with FormData for user ID:', user.id);
+    fd.forEach((value, key) => {
+      console.log(`  ${key}: ${value}`);
+    });
+
+    this.userService.updateUser(user.id, fd).subscribe({
+      next: (response) => {
+        console.log('✅ User status updated successfully:', response);
+        user.isActive = !user.isActive;
+        this.toastService.success(`User ${user.isActive ? 'activated' : 'deactivated'} successfully`);
+      },
+      error: (err) => {
+        console.error('❌ Error toggling user active status:', err);
+        console.error('❌ Error details:', err.error);
+        const errorMsg = err.error?.message || err.error?.title || 'Error updating user status';
+        this.toastService.error(errorMsg);
+      }
     });
   }
 

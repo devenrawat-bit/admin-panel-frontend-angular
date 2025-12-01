@@ -279,4 +279,58 @@ export class CmsForm implements OnInit {
       contentControl.markAsTouched();
     }
   }
+
+  // Real-time validation helpers
+  hasError(field: string): boolean {
+    const control = this.form.get(field);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  getErrorMessage(field: string): string {
+    const control = this.form.get(field);
+    if (!control || !control.errors) return '';
+    if (!control.dirty && !control.touched) return '';
+
+    if (field === 'title') {
+      if (control.errors['required']) return 'Title is required';
+      if (control.errors['minlength']) return 'Title must be at least 3 characters';
+      if (control.errors['maxlength']) return 'Title cannot exceed 100 characters';
+    }
+
+    if (field === 'key') {
+      if (control.errors['required']) return 'Key is required';
+      if (control.errors['minlength']) return 'Key must be at least 2 characters';
+      if (control.errors['maxlength']) return 'Key cannot exceed 50 characters';
+      if (control.errors['pattern']) return 'Key can only contain letters, numbers, underscores, and hyphens';
+    }
+
+    if (field === 'metaKeyword') {
+      if (control.errors['required']) return 'Meta Keyword is required';
+      if (control.errors['maxlength']) return 'Meta Keyword cannot exceed 200 characters';
+    }
+
+    if (field === 'content') {
+      if (control.errors['required']) return 'Content is required';
+    }
+
+    return '';
+  }
+
+  getCharacterCount(field: string): string {
+    const control = this.form.get(field);
+    const value = control?.value || '';
+    const length = value.length;
+
+    if (field === 'title') {
+      return `${length}/100`;
+    }
+    if (field === 'key') {
+      return `${length}/50`;
+    }
+    if (field === 'metaKeyword') {
+      return `${length}/200`;
+    }
+
+    return '';
+  }
 }

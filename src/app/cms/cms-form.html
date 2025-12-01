@@ -11,7 +11,10 @@
 
     <!-- KEY -->
     <div class="form-group">
-      <label>Key*</label>
+      <label>
+        Key<span class="required">*</span>
+        <span class="char-count">{{ getCharacterCount('key') }}</span>
+      </label>
       <input
         type="text"
         formControlName="key"
@@ -20,84 +23,52 @@
         class="form-control"
         (input)="onKeyInput()"
         (blur)="onKeyBlur()"
-        [ngClass]="{
-          'is-invalid': form['controls']['key'].touched &&
-                        form['controls']['key'].invalid
-        }"
+        [class.is-invalid]="hasError('key')"
       />
-
-      <div class="error" *ngIf="form['controls']['key'].touched &&
-                               form['controls']['key'].hasError('required')">
-        Key is required
-      </div>
-      <div class="error" *ngIf="form['controls']['key'].touched &&
-                               form['controls']['key'].hasError('minlength')">
-        Key must be at least 2 characters
-      </div>
-      <div class="error" *ngIf="form['controls']['key'].touched &&
-                               form['controls']['key'].hasError('maxlength')">
-        Key cannot exceed 50 characters
-      </div>
-      <div class="error" *ngIf="form['controls']['key'].touched &&
-                               form['controls']['key'].hasError('pattern')">
-        Key can only contain letters, numbers, hyphens, and underscores
+      <div class="error" *ngIf="hasError('key')">
+        {{ getErrorMessage('key') }}
       </div>
     </div>
 
     <!-- TITLE -->
     <div class="form-group">
-      <label>Title*</label>
+      <label>
+        Title<span class="required">*</span>
+        <span class="char-count">{{ getCharacterCount('title') }}</span>
+      </label>
       <input
         type="text"
         formControlName="title"
-        placeholder="Enter page title"
+        placeholder="Enter page title (3-100 characters)"
         maxlength="100"
         class="form-control"
         (input)="onTitleInput()"
         (blur)="onTitleBlur()"
-        [ngClass]="{
-          'is-invalid': form['controls']['title'].touched &&
-                        form['controls']['title'].invalid
-        }"
+        [class.is-invalid]="hasError('title')"
       />
-
-      <div class="error" *ngIf="form['controls']['title'].touched &&
-                               form['controls']['title'].hasError('required')">
-        Title is required
-      </div>
-      <div class="error" *ngIf="form['controls']['title'].touched &&
-                               form['controls']['title'].hasError('minlength')">
-        Title must be at least 3 characters
-      </div>
-      <div class="error" *ngIf="form['controls']['title'].touched &&
-                               form['controls']['title'].hasError('maxlength')">
-        Title cannot exceed 100 characters
+      <div class="error" *ngIf="hasError('title')">
+        {{ getErrorMessage('title') }}
       </div>
     </div>
 
     <!-- META KEYWORD -->
     <div class="form-group">
-      <label>Meta Keyword*</label>
+      <label>
+        Meta Keyword<span class="required">*</span>
+        <span class="char-count">{{ getCharacterCount('metaKeyword') }}</span>
+      </label>
       <input
         type="text"
         formControlName="metaKeyword"
-        placeholder="Enter meta keywords (comma separated)"
+        placeholder="Enter meta keywords (max 200 characters)"
         maxlength="200"
         class="form-control"
+        (input)="onMetaKeywordBlur()"
         (blur)="onMetaKeywordBlur()"
-        [ngClass]="{
-          'is-invalid': form['controls']['metaKeyword'].touched &&
-                        form['controls']['metaKeyword'].invalid
-        }"
+        [class.is-invalid]="hasError('metaKeyword')"
       />
-
-      <div class="error" *ngIf="form['controls']['metaKeyword'].touched &&
-                               form['controls']['metaKeyword'].hasError('required')">
-        Meta keyword is required
-      </div>
-      <div class="error" *ngIf="form['controls']['metaKeyword'].touched &&
-                               form['controls']['metaKeyword'].hasError('maxlength')">
-        Meta keyword cannot exceed 200 characters
+      <div class="error" *ngIf="hasError('metaKeyword')">
+        {{ getErrorMessage('metaKeyword') }}
       </div>
     </div>
 
@@ -112,7 +83,7 @@
 
     <!-- CONTENT (CKEditor) -->
     <div class="form-group">
-      <label>Content*</label>
+      <label>Content<span class="required">*</span></label>
 
       <ckeditor
         [editor]="Editor"
@@ -122,9 +93,8 @@
         (blur)="onContentBlur()"
       ></ckeditor>
 
-      <div class="error" *ngIf="form['controls']['content'].touched &&
-                               form['controls']['content'].invalid">
-        Content is required
+      <div class="error" *ngIf="hasError('content')">
+        {{ getErrorMessage('content') }}
       </div>
     </div>
 

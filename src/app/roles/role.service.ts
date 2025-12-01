@@ -47,11 +47,25 @@ export class RoleService {
     isActive: boolean;
     permissions: number[];
   }): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/Role/add-role`, role);
+    // Transform to PascalCase for backend
+    const backendPayload = {
+      Name: role.name,
+      Description: role.description,
+      IsActive: role.isActive,
+      Permissions: role.permissions
+    };
+    return this.http.post<any>(`${this.baseUrl}/Role/add-role`, backendPayload);
   }
 
   updateRole(id: string, body: UpdateRolePayload): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/Role/edit-role/${id}`, body);
+    // Transform to PascalCase for backend
+    const backendPayload = {
+      Name: body.name,
+      Description: body.description,
+      IsActive: body.isActive,
+      Permissions: body.permissions
+    };
+    return this.http.put<any>(`${this.baseUrl}/Role/edit-role/${id}`, backendPayload);
   }
 
   deleteRole(id: string): Observable<any> {

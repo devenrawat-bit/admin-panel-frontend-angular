@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FaqService, Faq as FaqModel } from './faq.service';
 import { ModalService } from '../shared/modal/modal.service';
+import { ToastService } from '../shared/toast/toast.service';
 
 @Component({
   selector: 'app-faq',
@@ -31,7 +32,8 @@ export class Faq implements OnInit {
   constructor(
     private faqService: FaqService, 
     private router: Router,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -131,11 +133,8 @@ export class Faq implements OnInit {
         // Update the local state
         faq.isActive = newStatus;
         
-        // Show success message if it's a string response
-        if (typeof response === 'string') {
-          // Don't show alert for toggle, just update silently
-          console.log('FAQ status updated:', response);
-        }
+        // Show success toast
+        this.toastService.success(`FAQ ${newStatus ? 'activated' : 'deactivated'} successfully`);
       },
       error: (err) => {
         console.error('Error toggling FAQ status:', err);
@@ -149,7 +148,7 @@ export class Faq implements OnInit {
           }
         }
         
-        alert(errorMessage);
+        this.toastService.error(errorMessage);
       },
     });
   }

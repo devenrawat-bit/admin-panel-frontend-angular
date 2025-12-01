@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RoleService, RoleDto } from './role.service';
 import { ModalService } from '../shared/modal/modal.service';
+import { ToastService } from '../shared/toast/toast.service';
 
 @Component({
   selector: 'app-roles',
@@ -34,7 +35,8 @@ export class Roles {
   constructor(
     private roleService: RoleService,
     private router: Router,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -45,6 +47,12 @@ export class Roles {
       this.page = 1;
       localStorage.removeItem('role_reset_sort');
     }
+    
+    console.log('🔍 Initial sort settings:', {
+      sortColumn: this.sortColumn,
+      sortDirection: this.sortDirection
+    });
+    
     this.loadRoles();
   }
 
@@ -63,6 +71,8 @@ export class Roles {
         isActive: this.searchActive || '',
       },
     };
+
+    console.log('📤 Roles request payload:', payload);
 
     this.roleService.getRoles(payload).subscribe({
       next: (res) => {
@@ -189,22 +199,56 @@ export class Roles {
   toggleActive(role: RoleDto) {
     const newValue = !role.isActive;
 
+    console.log('=== TOGGLE ROLE STATUS ===');
+    console.log('Role:', role);
+    console.log('New Value:', newValue);
+
     const body = {
       name: role.name,
       description: role.description ?? '',
       isActive: newValue,
       permissions: Array.isArray(role.permissions)
         ? role.permissions
-        : [role.permissions ?? 0],  // FIXED HERE
+        : [role.permissions ?? 0],
     };
 
+    console.log('Update Body:', body);
+
     this.roleService.updateRole(role.id, body).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('=== TOGGLE SUCCESS ===');
+        console.log('Response:', response);
         role.isActive = newValue;
+        this.toastService.success(`Role ${newValue ? 'activated' : 'deactivated'} successfully`);
       },
       error: (err) => {
-        console.error('❌ Error toggling isActive:', err);
-        alert('Error updating role status');
+        console.error('=== TOGGLE ERROR ===');
+        console.error('Full Error:', err);
+        console.error('Status:', err.status);
+        console.error('Error Body:', err.error);
+        console.error('Validation Errors Detail:', err.error?.errors);
+        
+        let errorMessage = 'Error updating role status';
+        
+        // Extract specific validation error
+        if (err.error?.errors) {
+          const errorDetails = Object.entries(err.error.errors)
+            .map(([field, messages]: [string, any]) => {
+              const msgs = Array.isArray(messages) ? messages : [messages];
+              return `${field}: ${msgs.join(', ')}`;
+            })
+            .join('\n');
+          errorMessage = errorDetails;
+          console.error('Formatted Errors:', errorDetails);
+        } else if (err.error?.message) {
+          errorMessage = err.error.message;
+        } else if (err.error?.Message) {
+          errorMessage = err.error.Message;
+        } else if (typeof err.error === 'string') {
+          errorMessage = err.error;
+        }
+        
+        this.toastService.error(errorMessage);
       },
     });
   }

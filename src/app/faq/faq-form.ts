@@ -1,11 +1,37 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 // @ts-ignore
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { FaqService } from './faq.service';
+
+// Custom validator for HTML content
+function htmlContentValidator(minLength: number, maxLength: number) {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value) {
+      return null; // Let required validator handle empty values
+    }
+
+    // Strip HTML tags to get plain text
+    const div = document.createElement('div');
+    div.innerHTML = control.value;
+    const textContent = div.textContent || div.innerText || '';
+    const trimmedText = textContent.trim();
+    const length = trimmedText.length;
+
+    if (length < minLength) {
+      return { minlength: { requiredLength: minLength, actualLength: length } };
+    }
+
+    if (length > maxLength) {
+      return { maxlength: { requiredLength: maxLength, actualLength: length } };
+    }
+
+    return null;
+  };
+}
 
 @Component({
   selector: 'app-faq-form',
@@ -63,8 +89,15 @@ export class FaqForm implements OnInit {
 
   initForm() {
     this.form = this.fb.group({
-      question: ['', [Validators.required, Validators.maxLength(500)]],
-      answer: ['', [Validators.required]],
+      question: ['', [
+        Validators.required,
+        Validators.minLength(5),
+        Validators.maxLength(200)
+      ]],
+      answer: ['', [
+        Validators.required,
+        htmlContentValidator(10, 1000)
+      ]],
       isActive: [true, [Validators.required]],
     });
   }
@@ -120,7 +153,51 @@ export class FaqForm implements OnInit {
 
   hasError(field: string): boolean {
     const control = this.form.get(field);
-    return !!(control && control.invalid && control.touched);
+    // Show error if field is invalid and has been interacted with (dirty or touched)
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  getErrorMessage(field: string): string {
+    const control = this.form.get(field);
+    if (!control || !control.errors) return '';
+    
+    // Show errors in real-time if field has been interacted with
+    if (!control.dirty && !control.touched) return '';
+
+    if (field === 'question') {
+      if (control.errors['required']) return 'Question is required';
+      if (control.errors['minlength']) return 'Question must be at least 5 characters';
+      if (control.errors['maxlength']) return 'Question cannot exceed 200 characters';
+    }
+
+    if (field === 'answer') {
+      if (control.errors['required']) return 'Answer is required';
+      if (control.errors['minlength']) return 'Answer must be at least 10 characters';
+      if (control.errors['maxlength']) return 'Answer cannot exceed 1000 characters';
+    }
+
+    return '';
+  }
+
+  getCharacterCount(field: string): string {
+    const control = this.form.get(field);
+    const value = control?.value || '';
+    
+    if (field === 'question') {
+      const length = value.length;
+      return `${length}/200`;
+    }
+    
+    if (field === 'answer') {
+      // For answer field, count actual text content without HTML tags
+      const div = document.createElement('div');
+      div.innerHTML = value;
+      const textContent = div.textContent || div.innerText || '';
+      const length = textContent.trim().length;
+      return `${length}/1000`;
+    }
+    
+    return '';
   }
 
   onEditorReady(editor: any) {
@@ -157,94 +234,34 @@ export class FaqForm implements OnInit {
 
     request.subscribe({
       next: (response) => {
-        console.log('FAQ save response:', response);
+        console.log('✅ FAQ save response:', response);
         this.saving = false;
-        
-        // Handle different response formats
-        let message = 'FAQ saved successfully';
-        
-        if (typeof response === 'string') {
-          message = response;
-        } else if (response && typeof response === 'object') {
-          if (response.message) {
-            message = response.message;
-          } else if (response.success !== undefined) {
-            message = response.success ? 'FAQ saved successfully' : 'Failed to save FAQ';
-          }
-        }
-        
-        this.successMessage = message;
+        this.successMessage = 'FAQ saved successfully';
         
         setTimeout(() => {
           this.router.navigate(['/faq']);
-        }, 3000);
+        }, 2000);
       },
       error: (err) => {
-        console.error('=== FAQ SAVE ERROR ===');
-        console.error('Full error object:', err);
-        console.error('Error status:', err.status);
-        console.error('Error error:', err.error);
-        
+        console.error('❌ FAQ SAVE ERROR:', err);
         this.saving = false;
         
-        // Handle error message - check for nested error structure
+        // Handle validation errors from backend
         let errorMessage = 'Failed to save FAQ';
-        let isSuccess = false;
         
-        if (err.error) {
-          // Check for nested structure: { error: {}, text: "message" }
-          if (err.error.text) {
-            errorMessage = err.error.text;
-            // Check if it's actually a success message
-            if (errorMessage.toLowerCase().includes('success') || 
-                errorMessage.toLowerCase().includes('created') ||
-                errorMessage.toLowerCase().includes('updated')) {
-              isSuccess = true;
-            }
-          }
-          // Check for nested error object with h_text
-          else if (err.error.error && err.error.error.h_text) {
-            errorMessage = err.error.error.h_text;
-            if (errorMessage.toLowerCase().includes('success') || 
-                errorMessage.toLowerCase().includes('created') ||
-                errorMessage.toLowerCase().includes('updated')) {
-              isSuccess = true;
-            }
-          }
-          // Check for h_text directly
-          else if (err.error.h_text) {
-            errorMessage = err.error.h_text;
-            if (errorMessage.toLowerCase().includes('success') || 
-                errorMessage.toLowerCase().includes('created') ||
-                errorMessage.toLowerCase().includes('updated')) {
-              isSuccess = true;
-            }
-          }
-          // Check for standard message
-          else if (err.error.message) {
-            errorMessage = err.error.message;
-          }
-          // If it's a string
-          else if (typeof err.error === 'string') {
-            errorMessage = err.error;
-          }
+        if (err.error?.errors) {
+          // ASP.NET validation errors
+          const errors = Object.values(err.error.errors).flat();
+          errorMessage = errors.join(', ');
+        } else if (err.error?.message) {
+          errorMessage = err.error.message;
+        } else if (typeof err.error === 'string') {
+          errorMessage = err.error;
         } else if (err.message) {
           errorMessage = err.message;
         }
         
-        console.log('Final error message:', errorMessage);
-        console.log('Is success:', isSuccess);
-        
-        // If it's a success message, just navigate without alert
-        if (isSuccess) {
-          console.log('FAQ saved successfully (from error handler)');
-          this.successMessage = errorMessage;
-          setTimeout(() => {
-            this.router.navigate(['/faq']);
-          }, 3000);
-        } else {
-          alert(errorMessage);
-        }
+        alert(errorMessage);
       },
     });
   }

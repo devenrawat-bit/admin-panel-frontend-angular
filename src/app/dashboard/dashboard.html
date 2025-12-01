@@ -14,7 +14,82 @@
 
 </div>
 
-<div class="dashboard-container">
-  <h1>Welcome to Dashboard</h1>
-  <p>Select an option from the sidebar to get started.</p>
+<div class="charts-container">
+  <!-- Users Pie Chart -->
+  <div class="chart-card">
+    <h3>Users Distribution</h3>
+    <div class="pie-chart-wrapper">
+      <svg class="pie-chart" viewBox="0 0 200 200">
+        <circle
+          class="pie-segment active"
+          cx="100"
+          cy="100"
+          r="80"
+          [attr.stroke-dasharray]="getUserActivePercentage() * 5.024 + ' 502.4'"
+          stroke-dashoffset="0"
+        />
+        <circle
+          class="pie-segment inactive"
+          cx="100"
+          cy="100"
+          r="80"
+          [attr.stroke-dasharray]="getUserInactivePercentage() * 5.024 + ' 502.4'"
+          [attr.stroke-dashoffset]="-getUserActivePercentage() * 5.024"
+        />
+      </svg>
+      <div class="chart-center">
+        <div class="total">{{ userStats.totalUsers }}</div>
+        <div class="label">Users</div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-color active"></span>
+        <span>Active: {{ userStats.activeUsers }} ({{ getUserActivePercentage() }}%)</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color inactive"></span>
+        <span>Inactive: {{ userStats.inactiveUsers }} ({{ getUserInactivePercentage() }}%)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Roles Pie Chart -->
+  <div class="chart-card">
+    <h3>Roles Distribution</h3>
+    <div class="pie-chart-wrapper">
+      <svg class="pie-chart" viewBox="0 0 200 200">
+        <circle
+          class="pie-segment active"
+          cx="100"
+          cy="100"
+          r="80"
+          [attr.stroke-dasharray]="getRoleActivePercentage() * 5.024 + ' 502.4'"
+          stroke-dashoffset="0"
+        />
+        <circle
+          class="pie-segment inactive"
+          cx="100"
+          cy="100"
+          r="80"
+          [attr.stroke-dasharray]="getRoleInactivePercentage() * 5.024 + ' 502.4'"
+          [attr.stroke-dashoffset]="-getRoleActivePercentage() * 5.024"
+        />
+      </svg>
+      <div class="chart-center">
+        <div class="total">{{ roleStats.totalRoles }}</div>
+        <div class="label">Roles</div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-color active"></span>
+        <span>Active: {{ roleStats.activeRoles }} ({{ getRoleActivePercentage() }}%)</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color inactive"></span>
+        <span>Inactive: {{ roleStats.inactiveRoles }} ({{ getRoleInactivePercentage() }}%)</span>
+      </div>
+    </div>
+  </div>
 </div>

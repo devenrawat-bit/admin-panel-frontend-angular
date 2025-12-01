@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CmsService, CmsDto } from './cms.service';
 import { ModalService } from '../shared/modal/modal.service';
+import { ToastService } from '../shared/toast/toast.service';
 
 @Component({
   selector: 'app-cms',
@@ -36,7 +37,8 @@ export class CmsList {
     private cmsService: CmsService,
     private router: Router,
     private route: ActivatedRoute,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -57,16 +59,31 @@ export class CmsList {
   loadCms() {
     this.loading = true;
 
+    const filters: Record<string, string> = {};
+    
+    if (this.searchTitle.trim()) {
+      filters['title'] = this.searchTitle.trim();
+    }
+    if (this.searchKey.trim()) {
+      filters['key'] = this.searchKey.trim();
+    }
+    if (this.searchMetaKeyword.trim()) {
+      filters['metakeyword'] = this.searchMetaKeyword.trim();
+    }
+    if (this.searchIsActive) {
+      filters['isactive'] = this.searchIsActive;
+    }
+
     const payload = {
       page: this.page,
       pageSize: this.pageSize,
-      searchTitle: this.searchTitle.trim(),
-      searchKey: this.searchKey.trim(),
-      searchMetaKeyword: this.searchMetaKeyword.trim(),
-      searchIsActive: this.searchIsActive, // '', 'true', 'false'
+      search: '',
       sortColumn: this.sortColumn,
       sortDirection: this.sortDirection,
+      filters: filters
     };
+
+    console.log('CMS Request Payload:', payload);
 
     this.cmsService.getCmsList(payload).subscribe({
       next: (res) => {
@@ -176,21 +193,39 @@ export class CmsList {
   toggleActive(item: CmsDto) {
     const newValue = !item.isActive;
 
-    const body = {
-      key: item.key,
-      title: item.title,
-      metaKeyword: item.metaKeyword,
-      content: item.content,
-      isActive: newValue,
-    };
+    // First fetch the full CMS data to ensure we have all required fields
+    this.cmsService.getCmsById(item.id).subscribe({
+      next: (res) => {
+        const fullData = res?.data;
+        if (!fullData) {
+          this.toastService.error('CMS data not found');
+          return;
+        }
 
-    this.cmsService.updateCms(item.id, body).subscribe({
-      next: () => {
-        item.isActive = newValue;
+        // Now update with complete data
+        const body = {
+          key: fullData.key,
+          title: fullData.title,
+          metaKeyword: fullData.metaKeyword,
+          content: fullData.content,
+          isActive: newValue,
+        };
+
+        this.cmsService.updateCms(item.id, body).subscribe({
+          next: () => {
+            item.isActive = newValue;
+            this.toastService.success(`CMS ${newValue ? 'activated' : 'deactivated'} successfully`);
+          },
+          error: (err) => {
+            console.error('Error toggling cms active', err);
+            const errorMsg = err.error?.message || err.error?.title || 'Error updating status';
+            this.toastService.error(errorMsg);
+          },
+        });
       },
       error: (err) => {
-        console.error('Error toggling cms active', err);
-        alert('Error updating status');
+        console.error('Error fetching CMS data', err);
+        this.toastService.error('Error loading CMS data');
       },
     });
   }

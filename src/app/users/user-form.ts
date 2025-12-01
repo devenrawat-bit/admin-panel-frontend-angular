@@ -523,12 +523,19 @@ export class UserForm {
 
   update(fd: FormData) {
     console.log('=== UPDATE USER REQUEST ===');
+    console.log('User ID:', this.userId);
     console.log('FormData contents:');
     fd.forEach((value, key) => {
       console.log(`${key}:`, value);
     });
 
-    this.userService.updateUser(fd).subscribe({
+    if (!this.userId) {
+      alert('Error: User ID is missing');
+      this.saving = false;
+      return;
+    }
+
+    this.userService.updateUser(this.userId, fd).subscribe({
       next: (response) => {
         console.log('=== UPDATE USER SUCCESS ===');
         console.log('Response:', response);

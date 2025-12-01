@@ -32,7 +32,9 @@ export class UserService {
     return this.http.post<any>(`${this.baseUrl}/User/create`, fd);
   }
 
-  updateUser(fd: FormData): Observable<any> {
+  updateUser(id: string, fd: FormData): Observable<any> {
+    // Add ID to FormData since backend expects it in the body, not URL
+    fd.append('Id', id);
     return this.http.put<any>(`${this.baseUrl}/User/edit-user`, fd);
   }
 

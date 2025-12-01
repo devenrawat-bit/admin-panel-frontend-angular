@@ -50,26 +50,105 @@
 }
 
 
-/* Welcome box section */
-.dashboard-container {
-  padding: 40px;
+/* Charts Container */
+.charts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.chart-card {
+  padding: 28px;
   background: white;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--gray-200);
 
-  h1 {
-    color: var(--text-primary);
-    margin-bottom: 16px;
-    font-size: 32px;
+  h3 {
+    font-size: 20px;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+}
+
+.pie-chart-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 24px;
+}
+
+.pie-chart {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.pie-segment {
+  fill: none;
+  stroke-width: 40;
+  transition: all 0.3s ease;
+
+  &.active {
+    stroke: #10b981;
   }
 
-  p {
+  &.inactive {
+    stroke: #ef4444;
+  }
+}
+
+.chart-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+
+  .total {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  .label {
+    font-size: 14px;
+    font-weight: 500;
     color: var(--text-secondary);
-    font-size: 16px;
-    line-height: 1.7;
+    margin-top: 4px;
+  }
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+
+  &.active {
+    background: #10b981;
+  }
+
+  &.inactive {
+    background: #ef4444;
   }
 }
 
@@ -98,16 +177,13 @@
     }
   }
 
-  .dashboard-container {
-    padding: 28px;
+  .charts-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 
-    h1 {
-      font-size: 26px;
-    }
-
-    p {
-      font-size: 15px;
-    }
+  .chart-card {
+    padding: 24px;
   }
 }
 
@@ -135,15 +211,20 @@
     }
   }
 
-  .dashboard-container {
-    padding: 24px;
+  .charts-container {
+    gap: 12px;
+  }
 
-    h1 {
-      font-size: 24px;
-    }
+  .chart-card {
+    padding: 20px;
+  }
 
-    p {
-      font-size: 14px;
-    }
+  .pie-chart-wrapper {
+    width: 180px;
+    height: 180px;
+  }
+
+  .chart-center .total {
+    font-size: 32px;
   }
 }

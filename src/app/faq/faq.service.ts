@@ -54,29 +54,27 @@ export class FaqService {
     sortColumn?: string,
     sortDirection?: string
   ): Observable<FaqListResponse> {
-    const body: PaginationRequest = {
+    const body: any = {
       page: page,
       pageSize: pageSize,
+      search: '',
       sortColumn: sortColumn || 'CreatedAt',
       sortDirection: sortDirection || 'desc',
+      filters: {}
     };
 
-    // Add search filters if provided
-    if (question) {
-      body.searchColumn = 'Question';
-      body.searchValue = question;
+    // Add filters as key-value pairs in the filters object
+    if (question && question.trim()) {
+      body.filters['question'] = question.trim();
     }
 
-    // Note: IsActive filter might need to be handled differently
-    // depending on your backend implementation
-    if (isActive) {
-      body.additionalProp1 = isActive;
+    if (isActive && isActive.trim()) {
+      body.filters['isActive'] = isActive.trim();
     }
 
     console.log('=== FAQ GET REQUEST ===');
     console.log('Request body:', body);
-    console.log('Sort column:', body.sortColumn);
-    console.log('Sort direction:', body.sortDirection);
+    console.log('Filters:', body.filters);
 
     return this.http.post<FaqListResponse>(`${this.apiUrl}/get-faq`, body);
   }
@@ -100,7 +98,9 @@ export class FaqService {
     answer: string;
     isActive: boolean;
   }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/add-faq`, faq);
+    return this.http.post(`${this.apiUrl}/add-faq`, faq, { 
+      responseType: 'text' as 'json'
+    });
   }
 
   updateFaq(
@@ -111,7 +111,9 @@ export class FaqService {
       isActive: boolean;
     }
   ): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/update-faq/${id}`, faq);
+    return this.http.put(`${this.apiUrl}/update-faq/${id}`, faq, { 
+      responseType: 'text' as 'json'
+    });
   }
 
   deleteFaq(id: number): Observable<any> {
