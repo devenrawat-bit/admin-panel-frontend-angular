@@ -26,16 +26,9 @@
             <img [src]="user.profileImage" [alt]="user.name" class="dropdown-profile-img" />
             <div class="dropdown-info">
               <div class="dropdown-name">{{ user.name }}</div>
-              <div class="dropdown-email">Manage Profile</div>
+              <div class="dropdown-email">{{ user.role }}</div>
             </div>
           </div>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fa-solid fa-user"></i> Profile
-          </a>
-          <a href="#" class="dropdown-item">
-            <i class="fa-solid fa-gear"></i> Settings
-          </a>
           <div class="dropdown-divider"></div>
           <button class="dropdown-item logout-btn" (click)="onLogout()">
             <i class="fa-solid fa-sign-out-alt"></i> Logout

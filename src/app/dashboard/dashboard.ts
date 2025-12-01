@@ -38,14 +38,8 @@ export class Dashboard {
   }
 
   loadStats() {
-    // Don't use count-users endpoint as it includes deleted users
-    // We'll get the count from loadUserStats instead
-    
-    // GET total Roles
-    this.http.get<any>('https://localhost:7065/api/Role/count-roles')
-      .subscribe(res => {
-        this.totalRoles = res?.total ?? 0;
-      });
+    // Don't use count endpoints as they may include deleted records
+    // We'll get the counts from loadUserStats and loadRoleStats instead
   }
 
   loadUserStats() {
@@ -121,6 +115,11 @@ export class Dashboard {
           inactiveRoles,
           totalRoles: roles.length
         };
+        
+        // Update the total roles count (excluding deleted roles)
+        this.totalRoles = roles.length;
+        
+        console.log('Role Stats:', this.roleStats);
       });
   }
 
