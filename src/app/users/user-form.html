@@ -2,6 +2,12 @@
 
   <h2>{{ mode === 'add' ? 'Add User' : 'Edit User' }}</h2>
 
+  <!-- Success Message -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <i class="fa-solid fa-circle-check"></i>
+    {{ successMessage }}
+  </div>
+
   <form [formGroup]="form" (ngSubmit)="submit()" class="user-form">
 
     <div class="form-row">
@@ -10,6 +16,7 @@
         <input type="text"
                formControlName="fullName"
                placeholder="Enter full name"
+               maxlength="100"
                (keypress)="allowOnlyLetters($event)"
                [class.error]="hasError('fullName', 'required') ||
                               hasError('fullName', 'minlength') ||
@@ -27,6 +34,7 @@
         <input type="email"
                formControlName="email"
                placeholder="Enter email"
+               maxlength="100"
                [readonly]="mode === 'edit'"
                [class.error]="hasError('email', 'required') || hasError('email', 'pattern')">
 
@@ -39,6 +47,7 @@
         <input type="password"
                formControlName="password"
                placeholder="Enter password"
+               maxlength="50"
                [class.error]="hasError('password', 'required') || hasError('password', 'pattern')">
 
         <div class="error-text" *ngIf="hasError('password', 'required')">Password is required</div>
@@ -50,13 +59,17 @@
 
     <div class="form-row">
       <div class="form-field">
-        <label>Phone Number</label>
+        <label>Phone Number<span class="required">*</span></label>
         <input type="text"
                formControlName="phoneNumber"
                placeholder="10-15 digits"
+               maxlength="15"
                (keypress)="allowOnlyNumbers($event)"
-               [class.error]="hasError('phoneNumber', 'pattern')">
+               [class.error]="hasError('phoneNumber', 'required') || hasError('phoneNumber', 'pattern')">
 
+        <div class="error-text" *ngIf="hasError('phoneNumber', 'required')">
+          Phone Number is required
+        </div>
         <div class="error-text" *ngIf="hasError('phoneNumber', 'pattern')">
           Phone must be 10–15 digits
         </div>
@@ -82,11 +95,14 @@
 
     <div class="form-row">
       <div class="form-field">
-        <label>Date of Birth</label>
+        <label>Date of Birth<span class="required">*</span></label>
         <input type="date"
                formControlName="dateOfBirth"
-               [class.error]="hasError('dateOfBirth', 'minAge')">
+               [class.error]="hasError('dateOfBirth', 'required') || hasError('dateOfBirth', 'minAge')">
 
+        <div class="error-text" *ngIf="hasError('dateOfBirth', 'required')">
+          Date of Birth is required
+        </div>
         <div class="error-text" *ngIf="hasError('dateOfBirth', 'minAge')">
           User must be at least 18 years old
         </div>

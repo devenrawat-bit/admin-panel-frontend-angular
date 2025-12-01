@@ -30,6 +30,11 @@ export class EditRole {
   loading = false;
   saving = false;
 
+  // Validation messages
+  successMessage = '';
+  errorMessage = '';
+  validationErrors: { [key: string]: string } = {};
+
   // permissions
   permissionGroups: PermissionGroup[] = PERMISSION_GROUPS;
   expandedGroups: Record<string, boolean> = {};
@@ -144,14 +149,53 @@ export class EditRole {
   // submit
 
   save() {
+    console.log('=== SAVE ROLE CLICKED ===');
+    console.log('Role Name:', this.name);
+    console.log('Description:', this.description);
+    console.log('Is Active:', this.isActive);
+    console.log('Selected Permissions:', Array.from(this.selectedPermissions));
+    
+    // Clear previous messages
+    this.successMessage = '';
+    this.errorMessage = '';
+    this.validationErrors = {};
+
+    // Client-side validation
     if (!this.name || this.name.trim().length === 0) {
-      alert('Role name is required');
+      this.validationErrors['name'] = 'Role name is required';
+      return;
+    }
+
+    if (this.name.trim().length < 2) {
+      this.validationErrors['name'] = 'Role name must be at least 2 characters';
+      return;
+    }
+
+    if (this.name.trim().length > 50) {
+      this.validationErrors['name'] = 'Role name cannot exceed 50 characters';
+      return;
+    }
+
+    // Description is now required
+    if (!this.description || this.description.trim().length === 0) {
+      this.validationErrors['description'] = 'Short description is required';
+      return;
+    }
+
+    if (this.description.trim().length < 10) {
+      this.validationErrors['description'] = 'Short description must be at least 10 characters';
+      return;
+    }
+
+    if (this.description.trim().length > 100) {
+      this.validationErrors['description'] = 'Short description cannot exceed 100 characters';
       return;
     }
 
     this.saving = true;
 
     const permissionsArray = Array.from(this.selectedPermissions);
+    console.log('Permissions Array:', permissionsArray);
 
     if (this.mode === 'add') {
       const body = {
@@ -161,15 +205,58 @@ export class EditRole {
         permissions: permissionsArray,
       };
 
+      console.log('=== ADD ROLE REQUEST ===');
+      console.log('Request Body:', body);
+
       this.roleService.addRole(body).subscribe({
-        next: () => {
+        next: (response) => {
+          console.log('=== ADD ROLE SUCCESS ===');
+          console.log('Response:', response);
           this.saving = false;
-          this.router.navigate(['/roles']);
+          
+          // Show success message
+          this.successMessage = response?.message || 'Role created successfully';
+          
+          // Redirect after 3 seconds
+          setTimeout(() => {
+            localStorage.setItem('role_reset_sort', 'true');
+            this.router.navigate(['/roles']).then(() => {
+              window.location.reload();
+            });
+          }, 3000);
         },
         error: (err) => {
-          console.error('Error adding role', err);
+          console.error('=== ADD ROLE ERROR ===');
+          console.error('Full Error:', err);
+          console.error('Status:', err.status);
+          console.error('Error Body:', err.error);
+          console.error('Validation Errors:', err.error?.errors);
+          
           this.saving = false;
-          alert('Error adding role');
+          
+          // Handle validation errors from backend
+          if (err.error?.errors) {
+            // ASP.NET validation errors
+            Object.entries(err.error.errors).forEach(([field, messages]: [string, any]) => {
+              const msgs = Array.isArray(messages) ? messages : [messages];
+              const fieldName = field.toLowerCase();
+              this.validationErrors[fieldName] = msgs.join(', ');
+            });
+            this.errorMessage = 'Please fix the validation errors below';
+          } else if (err.error?.message) {
+            this.errorMessage = err.error.message;
+          } else if (err.error?.Message) {
+            this.errorMessage = err.error.Message;
+          } else if (typeof err.error === 'string') {
+            this.errorMessage = err.error;
+          } else if (err.error?.title) {
+            this.errorMessage = err.error.title;
+          } else {
+            this.errorMessage = 'Error adding role. Please try again.';
+          }
+          
+          console.log('Error Message:', this.errorMessage);
+          console.log('Validation Errors:', this.validationErrors);
         },
       });
     } else if (this.mode === 'edit' && this.roleId) {
@@ -180,15 +267,49 @@ export class EditRole {
         permissions: permissionsArray,
       };
 
+      console.log('=== UPDATE ROLE REQUEST ===');
+      console.log('Role ID:', this.roleId);
+      console.log('Request Body:', body);
+
       this.roleService.updateRole(this.roleId, body).subscribe({
-        next: () => {
+        next: (response) => {
+          console.log('=== UPDATE ROLE SUCCESS ===');
+          console.log('Response:', response);
           this.saving = false;
-          this.router.navigate(['/roles']);
+          
+          // Show success message
+          this.successMessage = response?.message || 'Role updated successfully';
+          
+          // Redirect after 3 seconds
+          setTimeout(() => {
+            this.router.navigate(['/roles']);
+          }, 3000);
         },
         error: (err) => {
-          console.error('Error updating role', err);
+          console.error('=== UPDATE ROLE ERROR ===');
+          console.error('Full Error:', err);
+          console.error('Status:', err.status);
+          console.error('Error Body:', err.error);
+          
           this.saving = false;
-          alert('Error updating role');
+          
+          // Handle validation errors from backend
+          if (err.error?.errors) {
+            Object.entries(err.error.errors).forEach(([field, messages]: [string, any]) => {
+              const msgs = Array.isArray(messages) ? messages : [messages];
+              const fieldName = field.toLowerCase();
+              this.validationErrors[fieldName] = msgs.join(', ');
+            });
+            this.errorMessage = 'Please fix the validation errors below';
+          } else if (err.error?.message) {
+            this.errorMessage = err.error.message;
+          } else if (err.error?.Message) {
+            this.errorMessage = err.error.Message;
+          } else if (typeof err.error === 'string') {
+            this.errorMessage = err.error;
+          } else {
+            this.errorMessage = 'Error updating role. Please try again.';
+          }
         },
       });
     }
@@ -196,5 +317,75 @@ export class EditRole {
 
   cancel() {
     this.router.navigate(['/roles']);
+  }
+
+  // Blur validation methods
+  onNameBlur() {
+    // Clear previous error
+    delete this.validationErrors['name'];
+
+    if (!this.name || this.name.trim().length === 0) {
+      this.validationErrors['name'] = 'Role name is required';
+      return;
+    }
+
+    if (this.name.trim().length < 2) {
+      this.validationErrors['name'] = 'Role name must be at least 2 characters';
+      return;
+    }
+
+    if (this.name.trim().length > 50) {
+      this.validationErrors['name'] = 'Role name cannot exceed 50 characters';
+      return;
+    }
+  }
+
+  onDescriptionBlur() {
+    // Clear previous error
+    delete this.validationErrors['description'];
+
+    if (!this.description || this.description.trim().length === 0) {
+      this.validationErrors['description'] = 'Short description is required';
+      return;
+    }
+
+    if (this.description.trim().length < 10) {
+      this.validationErrors['description'] = 'Short description must be at least 10 characters';
+      return;
+    }
+
+    if (this.description.trim().length > 100) {
+      this.validationErrors['description'] = 'Short description cannot exceed 100 characters';
+      return;
+    }
+  }
+
+  // Dynamic validation methods (trigger on input)
+  onNameInput() {
+    // Clear previous error
+    delete this.validationErrors['name'];
+
+    // Only validate if field has content
+    if (this.name && this.name.trim().length > 0) {
+      if (this.name.trim().length < 2) {
+        this.validationErrors['name'] = 'Role name must be at least 2 characters';
+      } else if (this.name.trim().length > 50) {
+        this.validationErrors['name'] = 'Role name cannot exceed 50 characters';
+      }
+    }
+  }
+
+  onDescriptionInput() {
+    // Clear previous error
+    delete this.validationErrors['description'];
+
+    // Only validate if field has content
+    if (this.description && this.description.trim().length > 0) {
+      if (this.description.trim().length < 10) {
+        this.validationErrors['description'] = 'Short description must be at least 10 characters';
+      } else if (this.description.trim().length > 100) {
+        this.validationErrors['description'] = 'Short description cannot exceed 100 characters';
+      }
+    }
   }
 }

@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CmsService, CmsDto } from './cms.service';
+import { ModalService } from '../shared/modal/modal.service';
 
 @Component({
   selector: 'app-cms',
@@ -25,18 +26,31 @@ export class CmsList {
   pageSize = 10;
   totalItems = 0;
 
-  // sorting - default to CreatedAt descending (newest first)
-  sortColumn = 'CreatedAt';
+  // sorting - default to CreatedOn descending (newest first)
+  sortColumn = 'CreatedOn';
   sortDirection: 'asc' | 'desc' = 'desc';
 
   loading = false;
 
   constructor(
     private cmsService: CmsService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
+    private modalService: ModalService
   ) {}
 
   ngOnInit() {
+    // Check if we need to reset to default sorting (e.g., after adding new CMS)
+    const resetSort = localStorage.getItem('cms_reset_sort');
+    if (resetSort === 'true') {
+      // Reset to default sorting
+      this.sortColumn = 'CreatedOn';
+      this.sortDirection = 'desc';
+      this.page = 1;
+      // Clear the flag
+      localStorage.removeItem('cms_reset_sort');
+    }
+    
     this.loadCms();
   }
 
@@ -139,16 +153,22 @@ export class CmsList {
     this.router.navigate(['/cms/edit', item.id]);
   }
 
-  deleteCms(item: CmsDto) {
-    if (!confirm(`Delete CMS "${item.title}" ?`)) return;
+  async deleteCms(item: CmsDto) {
+    const confirmed = await this.modalService.confirm(
+      'Delete CMS',
+      `Are you sure you want to delete "${item.title}"?`
+    );
+
+    if (!confirmed) return;
 
     this.cmsService.deleteCms(item.id).subscribe({
       next: () => {
+        this.modalService.success('Success', 'CMS deleted successfully');
         this.loadCms();
       },
       error: (err) => {
         console.error('Error deleting CMS', err);
-        alert('Error deleting CMS');
+        this.modalService.success('Error', 'Failed to delete CMS'); // Using success modal for error for now as requested "interactive popup"
       },
     });
   }

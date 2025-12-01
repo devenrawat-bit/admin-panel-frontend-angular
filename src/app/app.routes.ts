@@ -1,7 +1,10 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './auth/auth.guard';
 
 // AUTH
 import { Login } from './login/login';
+import { ForgotPassword } from './forgot-password/forgot-password';
+import { ResetPassword } from './reset-password/reset-password';
 
 // LAYOUT WRAPPER
 import { Layout } from './layout/layout';
@@ -28,11 +31,28 @@ import { FaqForm } from './faq/faq-form';
 
 export const routes: Routes = [
   // -----------------------------
+  // ROOT REDIRECT TO LOGIN
+  // -----------------------------
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
+  },
+
+  // -----------------------------
   // LOGIN STAYS OUTSIDE LAYOUT
   // -----------------------------
   {
     path: 'login',
     component: Login,
+  },
+  {
+    path: 'forgot-password',
+    component: ForgotPassword,
+  },
+  {
+    path: 'reset-password',
+    component: ResetPassword,
   },
 
   // -----------------------------
@@ -41,6 +61,7 @@ export const routes: Routes = [
   {
     path: '',
     component: Layout,
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 

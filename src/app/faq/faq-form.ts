@@ -20,6 +20,7 @@ export class FaqForm implements OnInit {
   faqId: number | null = null;
   loading = false;
   saving = false;
+  successMessage = '';
 
   // CKEditor
   public Editor = ClassicEditor;
@@ -62,7 +63,7 @@ export class FaqForm implements OnInit {
 
   initForm() {
     this.form = this.fb.group({
-      question: ['', [Validators.required]],
+      question: ['', [Validators.required, Validators.maxLength(500)]],
       answer: ['', [Validators.required]],
       isActive: [true, [Validators.required]],
     });
@@ -76,17 +77,28 @@ export class FaqForm implements OnInit {
       next: (response) => {
         console.log('Load FAQ response:', response);
         
-        if (response.success && response.data && response.data.data) {
-          // Backend returns: { success, data: { data: [...], totalItems, page, pageSize } }
-          // Find the FAQ with matching ID
-          const faqData = response.data.data.find((f: any) => f.id === this.faqId);
+        if (response.success && response.data) {
+          // Backend returns: { success, data: { ... } }
+          // Check if data is directly the FAQ object or nested
+          let faqData = response.data;
+          
+          // If response.data has a data property that is an array (pagination structure)
+          if (response.data.data && Array.isArray(response.data.data)) {
+             faqData = response.data.data.find((f: any) => f.id === this.faqId);
+          }
 
           if (faqData) {
             this.form.patchValue({
               question: faqData.question,
-              answer: faqData.answer,
               isActive: faqData.isActive,
             });
+            
+            // Use setTimeout to ensure CKEditor is ready
+            setTimeout(() => {
+              this.form.patchValue({
+                answer: faqData.answer
+              });
+            }, 100);
           } else {
             alert('FAQ not found');
             this.router.navigate(['/faq']);
@@ -124,6 +136,7 @@ export class FaqForm implements OnInit {
     }
 
     this.saving = true;
+    this.successMessage = '';
     const formValue = this.form.value;
     
     // Prepare data for backend - only send fields that backend expects
@@ -160,8 +173,11 @@ export class FaqForm implements OnInit {
           }
         }
         
-        alert(message);
-        this.router.navigate(['/faq']);
+        this.successMessage = message;
+        
+        setTimeout(() => {
+          this.router.navigate(['/faq']);
+        }, 3000);
       },
       error: (err) => {
         console.error('=== FAQ SAVE ERROR ===');
@@ -222,7 +238,10 @@ export class FaqForm implements OnInit {
         // If it's a success message, just navigate without alert
         if (isSuccess) {
           console.log('FAQ saved successfully (from error handler)');
-          this.router.navigate(['/faq']);
+          this.successMessage = errorMessage;
+          setTimeout(() => {
+            this.router.navigate(['/faq']);
+          }, 3000);
         } else {
           alert(errorMessage);
         }

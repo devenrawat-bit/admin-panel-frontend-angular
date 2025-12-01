@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { UserService } from './user.service';
+import { ModalService } from '../shared/modal/modal.service';
 
 @Component({
   selector: 'app-users',
@@ -12,7 +13,6 @@ import { UserService } from './user.service';
   styleUrls: ['./users.scss'],
 })
 export class Users {
-
   users: any[] = [];
 
   // Filters visible in UI
@@ -37,7 +37,8 @@ export class Users {
 
   constructor(
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private modalService: ModalService
   ) {}
 
   ngOnInit() {
@@ -213,11 +214,23 @@ export class Users {
     this.router.navigate(['/users/edit', user.id]);
   }
 
-  deleteUser(user: any) {
-    if (!confirm(`Delete user "${user.fullName}" ?`)) return;
+  async deleteUser(user: any) {
+    const confirmed = await this.modalService.confirm(
+      'Delete User',
+      `Are you sure you want to delete "${user.fullName}"?`
+    );
 
-    this.userService.deleteUser(user.id).subscribe(() => {
-      this.loadUsers();
+    if (!confirmed) return;
+
+    this.userService.deleteUser(user.id).subscribe({
+      next: () => {
+        this.modalService.success('Success', 'User deleted successfully');
+        this.loadUsers();
+      },
+      error: (err) => {
+        console.error('Error deleting user', err);
+        this.modalService.success('Error', 'Failed to delete user');
+      }
     });
   }
 }

@@ -94,8 +94,12 @@
         </td>
 
         <td class="actions">
-          <button class="edit-btn" (click)="editUser(user)">✏️</button>
-          <button class="delete-btn" (click)="deleteUser(user)">🗑️</button>
+          <button class="edit-btn" (click)="editUser(user)" title="Edit">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+          <button class="delete-btn" (click)="deleteUser(user)" title="Delete">
+            <i class="fa-solid fa-trash"></i>
+          </button>
         </td>
       </tr>
 

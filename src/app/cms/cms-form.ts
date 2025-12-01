@@ -1,5 +1,5 @@
 // src/app/cms/cms-form.ts
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -21,7 +21,7 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
   templateUrl: './cms-form.html',
   styleUrls: ['./cms-form.scss'],
 })
-export class CmsForm {
+export class CmsForm implements OnInit {
   // CKEditor instance
   public Editor: any = ClassicEditor;
   public editorConfig = {
@@ -50,7 +50,7 @@ export class CmsForm {
 
   loading = false;
   saving = false;
-  editorReady = false;
+  successMessage = '';
 
   constructor(
     private fb: FormBuilder,
@@ -60,11 +60,23 @@ export class CmsForm {
   ) {}
 
   ngOnInit() {
-    // reactive form
+    // reactive form - matching backend CreateCmsViewModel
     this.form = this.fb.group({
-      key: ['', [Validators.required, Validators.maxLength(100)]],
-      title: ['', [Validators.required, Validators.maxLength(150)]],
-      metaKeyword: ['', [Validators.required, Validators.maxLength(200)]],
+      key: ['', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(50),
+        Validators.pattern(/^[a-zA-Z0-9_-]+$/)
+      ]],
+      title: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(100)
+      ]],
+      metaKeyword: ['', [
+        Validators.required,
+        Validators.maxLength(200)
+      ]],
       isActive: [true, [Validators.required]],
       content: ['', [Validators.required]],
     });
@@ -78,10 +90,6 @@ export class CmsForm {
     } else {
       this.mode = 'add';
     }
-  }
-
-  get f() {
-    return this.form.controls;
   }
 
   // existing CMS load for edit
@@ -126,20 +134,19 @@ export class CmsForm {
 
   // CKEditor ready event
   onEditorReady(editor: any) {
-    this.editorReady = true;
     console.log('CKEditor is ready', editor);
   }
 
   submit() {
+    // Check if content is empty manually since CKEditor might not trigger validation immediately
+    const contentControl = this.form.get('content');
+    if (!contentControl?.value) {
+      contentControl?.setErrors({ required: true });
+      contentControl?.markAsTouched();
+    }
+
     // Mark all fields as touched to show validation errors
     this.form.markAllAsTouched();
-    
-    // Get current CKEditor content
-    const contentControl = this.form.get('content');
-    if (contentControl && !contentControl.value) {
-      // Content is empty, mark as invalid
-      contentControl.setErrors({ 'required': true });
-    }
 
     if (this.form.invalid) {
       console.log("Form invalid, errors:", this.form.errors);
@@ -160,22 +167,46 @@ export class CmsForm {
     console.log('Full body:', body);
 
     this.saving = true;
+    this.successMessage = '';
 
     if (this.mode === 'add') {
       // create
       this.cmsService.addCms(body).subscribe({
         next: () => {
           this.saving = false;
-          alert('CMS created successfully');
-          this.router.navigate(['/cms']);
+          this.successMessage = 'CMS created successfully';
+          
+          // Set flag in localStorage to reset sorting
+          localStorage.setItem('cms_reset_sort', 'true');
+          
+          // Navigate without reload after 3 seconds
+          setTimeout(() => {
+            this.router.navigate(['/cms']);
+          }, 3000);
         },
         error: (err) => {
           console.error('Error adding CMS', err);
+          console.error('Error details:', err.error);
           this.saving = false;
-          alert(
-            'Error adding CMS: ' +
-              (err.error?.message || err.message || 'Unknown error')
-          );
+          
+          // Show detailed validation errors
+          let errorMessage = 'Error adding CMS:\n';
+          
+          if (err.error?.errors) {
+            // ASP.NET validation errors
+            Object.keys(err.error.errors).forEach(key => {
+              const messages = err.error.errors[key];
+              errorMessage += `\n${key}: ${Array.isArray(messages) ? messages.join(', ') : messages}`;
+            });
+          } else if (err.error?.message) {
+            errorMessage += err.error.message;
+          } else if (err.error?.title) {
+            errorMessage += err.error.title;
+          } else {
+            errorMessage += err.message || 'Unknown error';
+          }
+          
+          alert(errorMessage);
         },
       });
     } else if (this.mode === 'edit' && this.cmsId !== null) {
@@ -183,8 +214,11 @@ export class CmsForm {
       this.cmsService.updateCms(this.cmsId, body).subscribe({
         next: () => {
           this.saving = false;
-          alert('CMS updated successfully');
-          this.router.navigate(['/cms']);
+          this.successMessage = 'CMS updated successfully';
+          
+          setTimeout(() => {
+            this.router.navigate(['/cms']);
+          }, 3000);
         },
         error: (err) => {
           console.error('Error updating CMS', err);
@@ -200,5 +234,49 @@ export class CmsForm {
 
   cancel() {
     this.router.navigate(['/cms']);
+  }
+
+  // Dynamic validation methods (trigger on input)
+  onKeyInput() {
+    const keyControl = this.form.get('key');
+    if (keyControl) {
+      keyControl.markAsTouched();
+    }
+  }
+
+  onTitleInput() {
+    const titleControl = this.form.get('title');
+    if (titleControl) {
+      titleControl.markAsTouched();
+    }
+  }
+
+  // Blur validation methods
+  onKeyBlur() {
+    const keyControl = this.form.get('key');
+    if (keyControl) {
+      keyControl.markAsTouched();
+    }
+  }
+
+  onTitleBlur() {
+    const titleControl = this.form.get('title');
+    if (titleControl) {
+      titleControl.markAsTouched();
+    }
+  }
+
+  onMetaKeywordBlur() {
+    const metaKeywordControl = this.form.get('metaKeyword');
+    if (metaKeywordControl) {
+      metaKeywordControl.markAsTouched();
+    }
+  }
+
+  onContentBlur() {
+    const contentControl = this.form.get('content');
+    if (contentControl) {
+      contentControl.markAsTouched();
+    }
   }
 }

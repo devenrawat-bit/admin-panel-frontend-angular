@@ -1,0 +1,148 @@
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-container {
+    background: white;
+    padding: 32px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: center;
+}
+
+.modal-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 28px;
+
+    &.confirm {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+
+    &.success {
+        background: #d1fae5;
+        color: #10b981;
+    }
+
+    &.error {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+}
+
+.modal-message {
+    color: #6b7280;
+    margin-bottom: 24px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+
+    button {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+
+        &:hover {
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+}
+
+.btn-cancel {
+    background: #f3f4f6;
+    color: #374151;
+
+    &:hover {
+        background: #e5e7eb;
+    }
+}
+
+.btn-confirm {
+    color: white;
+
+    &.confirm {
+        background: #ef4444;
+
+        &:hover {
+            background: #dc2626;
+        }
+    }
+
+    &.success {
+        background: #10b981;
+        width: 100%;
+
+        &:hover {
+            background: #059669;
+        }
+    }
+
+    &.error {
+        background: #ef4444;
+        width: 100%;
+
+        &:hover {
+            background: #dc2626;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}

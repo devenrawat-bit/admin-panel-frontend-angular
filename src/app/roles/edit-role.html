@@ -11,16 +11,50 @@
     {{ mode === 'add' ? 'Add Role' : 'Edit Role' }}
   </h2>
 
+  <!-- Success Message -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <i class="fa-solid fa-circle-check"></i>
+    {{ successMessage }}
+  </div>
+
+  <!-- Error Message -->
+  <div class="alert alert-error" *ngIf="errorMessage">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    {{ errorMessage }}
+  </div>
+
   <!-- Top fields -->
   <div class="top-row">
     <div class="field">
       <label>Role Name<span class="required">*</span></label>
-      <input type="text" [(ngModel)]="name" />
+      <input 
+        type="text" 
+        [(ngModel)]="name" 
+        placeholder="Enter role name (2-50 characters)"
+        maxlength="50"
+        [class.error]="validationErrors['name']"
+        (blur)="onNameBlur()"
+        (input)="onNameInput()"
+      />
+      <small class="error-text" *ngIf="validationErrors['name']">
+        {{ validationErrors['name'] }}
+      </small>
     </div>
 
     <div class="field">
-      <label>Short Description</label>
-      <input type="text" [(ngModel)]="description" />
+      <label>Short Description<span class="required">*</span></label>
+      <input 
+        type="text" 
+        [(ngModel)]="description"
+        placeholder="Enter description (10-100 characters)"
+        maxlength="100"
+        [class.error]="validationErrors['description']"
+        (blur)="onDescriptionBlur()"
+        (input)="onDescriptionInput()"
+      />
+      <small class="error-text" *ngIf="validationErrors['description']">
+        {{ validationErrors['description'] }}
+      </small>
     </div>
 
     <div class="field">

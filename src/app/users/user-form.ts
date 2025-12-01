@@ -27,6 +27,7 @@ export class UserForm {
 
   loading = false;
   saving = false;
+  successMessage = '';
 
   form: any;
 
@@ -103,15 +104,15 @@ export class UserForm {
         ]
       ],
 
-      password: [''],
+      password: ['', Validators.required], // Will be set conditionally in ngOnInit
 
-      phoneNumber: ['', [Validators.pattern(/^\d{10,15}$/)]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{10,15}$/)]],
 
       role: ['', Validators.required],
 
       isActive: [true, Validators.required],
 
-      dateOfBirth: ['', this.validateDateOfBirth],
+      dateOfBirth: ['', [Validators.required, this.validateDateOfBirth]],
 
       countryId: [null, Validators.required],
       stateId: [null, Validators.required],
@@ -151,19 +152,44 @@ export class UserForm {
   loadRoles() {
     this.userService.getRoles().subscribe({
       next: (res) => {
+        console.log('=== ROLES API RESPONSE ===');
+        console.log('Full Response:', res);
+        
         let rolesArray: any[] = [];
 
-        if (Array.isArray(res)) rolesArray = res;
-        else if (res?.data && Array.isArray(res.data)) rolesArray = res.data;
-        else if (res?.Data && Array.isArray(res.Data)) rolesArray = res.Data;
-        else if (res?.message && Array.isArray(res.message)) rolesArray = res.message;
+        // Handle nested response structure: { success: true, data: { Data: { Data: [roles] } } }
+        if (res?.data?.Data?.Data && Array.isArray(res.data.Data.Data)) {
+          rolesArray = res.data.Data.Data;
+        } else if (res?.data?.data?.data && Array.isArray(res.data.data.data)) {
+          rolesArray = res.data.data.data;
+        } else if (res?.Data?.Data && Array.isArray(res.Data.Data)) {
+          rolesArray = res.Data.Data;
+        } else if (res?.data?.Data && Array.isArray(res.data.Data)) {
+          rolesArray = res.data.Data;
+        } else if (Array.isArray(res)) {
+          rolesArray = res;
+        } else if (res?.data && Array.isArray(res.data)) {
+          rolesArray = res.data;
+        } else if (res?.Data && Array.isArray(res.Data)) {
+          rolesArray = res.Data;
+        }
+
+        console.log('Extracted Roles Array:', rolesArray);
 
         this.roles = rolesArray.map((r: any) => ({
-          id: r.id,
-          name: r.name || r.roleName || r.role
+          id: r.id || r.Id,
+          name: r.name || r.Name || r.roleName || r.RoleName || r.role || r.Role
         }));
+        
+        console.log('Mapped Roles:', this.roles);
       },
-      error: () => (this.roles = [])
+      error: (err) => {
+        console.error('=== ROLES API ERROR ===');
+        console.error('Error:', err);
+        console.error('Status:', err.status);
+        console.error('Error Body:', err.error);
+        this.roles = [];
+      }
     });
   }
 
@@ -231,7 +257,16 @@ export class UserForm {
 
     this.userService.getUserById(id).subscribe({
       next: (res) => {
+        console.log('=== LOAD USER RESPONSE ===');
+        console.log('Full Response:', res);
+        console.log('res.data:', res?.data);
+        console.log('res.message:', res?.message);
+        
         const u = res?.data?.[0] || res?.message?.data?.[0];
+
+        console.log('Extracted User:', u);
+        console.log('User Email:', u?.email);
+        console.log('User FullName:', u?.fullName);
 
         if (!u) {
           alert("User not found");
@@ -239,7 +274,7 @@ export class UserForm {
           return;
         }
 
-        this.form.patchValue({
+        const formData = {
           fullName: u.fullName || '',
           email: u.email || '',
           phoneNumber: u.phoneNumber || '',
@@ -249,7 +284,10 @@ export class UserForm {
           countryId: u.countryId || null,
           stateId: u.stateId || null,
           cityId: u.cityId || null
-        });
+        };
+
+        console.log('Form Data to Patch:', formData);
+        this.form.patchValue(formData);
 
         if (u.countryId) {
           this.userService.getStates(u.countryId).subscribe({
@@ -298,6 +336,11 @@ export class UserForm {
       return;
     }
 
+    console.log('=== FILE SELECTED ===');
+    console.log('File name:', file.name);
+    console.log('File size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+    console.log('File type:', file.type);
+
     if (!this.validateImageSize(file)) {
       event.target.value = '';
       this.selectedFile = null;
@@ -323,11 +366,78 @@ export class UserForm {
   submit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      alert("Please fill all required fields correctly");
+      
+      // Collect all validation errors
+      const errors: string[] = [];
+      
+      if (this.form.get('fullName')?.invalid) {
+        if (this.form.get('fullName')?.hasError('required')) {
+          errors.push('Full Name is required');
+        } else if (this.form.get('fullName')?.hasError('minlength')) {
+          errors.push('Full Name must be at least 2 characters');
+        } else if (this.form.get('fullName')?.hasError('pattern')) {
+          errors.push('Full Name can only contain letters and spaces');
+        }
+      }
+      
+      if (this.form.get('email')?.invalid) {
+        if (this.form.get('email')?.hasError('required')) {
+          errors.push('Email is required');
+        } else if (this.form.get('email')?.hasError('pattern')) {
+          errors.push('Please enter a valid email address');
+        }
+      }
+      
+      if (this.form.get('password')?.invalid && this.mode === 'add') {
+        if (this.form.get('password')?.hasError('required')) {
+          errors.push('Password is required');
+        } else if (this.form.get('password')?.hasError('pattern')) {
+          errors.push('Password must contain uppercase, number, and special character (8-50 chars)');
+        }
+      }
+      
+      if (this.form.get('phoneNumber')?.invalid) {
+        if (this.form.get('phoneNumber')?.hasError('required')) {
+          errors.push('Phone Number is required');
+        } else if (this.form.get('phoneNumber')?.hasError('pattern')) {
+          errors.push('Phone Number must be 10-15 digits');
+        }
+      }
+      
+      if (this.form.get('role')?.hasError('required')) {
+        errors.push('Role is required');
+      }
+      
+      if (this.form.get('dateOfBirth')?.invalid) {
+        if (this.form.get('dateOfBirth')?.hasError('required')) {
+          errors.push('Date of Birth is required');
+        } else if (this.form.get('dateOfBirth')?.hasError('minAge')) {
+          errors.push('User must be at least 18 years old');
+        }
+      }
+      
+      if (this.form.get('countryId')?.hasError('required')) {
+        errors.push('Country is required');
+      }
+      
+      if (this.form.get('stateId')?.hasError('required')) {
+        errors.push('State is required');
+      }
+      
+      if (this.form.get('cityId')?.hasError('required')) {
+        errors.push('City is required');
+      }
+      
+      const errorMessage = errors.length > 0 
+        ? 'Please fix the following errors:\n\n• ' + errors.join('\n• ')
+        : 'Please fill all required fields correctly';
+      
+      alert(errorMessage);
       return;
     }
 
     this.saving = true;
+    this.successMessage = '';
 
     const value = this.form.value;
     const fd = new FormData();
@@ -359,31 +469,113 @@ export class UserForm {
   }
 
   create(fd: FormData) {
+    console.log('=== CREATE USER REQUEST ===');
+    console.log('FormData contents:');
+    fd.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
+
     this.userService.createUser(fd).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('=== CREATE USER SUCCESS ===');
+        console.log('Response:', response);
         this.saving = false;
-        alert("User created successfully");
-        this.router.navigate(['/users']);
+        this.successMessage = "User created successfully";
+        
+        setTimeout(() => {
+          this.router.navigate(['/users']);
+        }, 3000);
       },
-      error: () => {
+      error: (err) => {
+        console.error('=== CREATE USER ERROR ===');
+        console.error('Full Error:', err);
+        console.error('Status:', err.status);
+        console.error('Error Body:', err.error);
+        console.error('Error Message:', err.message);
+        
         this.saving = false;
-        alert("Error creating user");
+        
+        let errorMessage = "Error creating user";
+        
+        if (err.status === 400) {
+          if (typeof err.error === 'string') {
+            errorMessage = err.error;
+          } else if (err.error?.message) {
+            errorMessage = err.error.message;
+          } else if (err.error?.errors) {
+            // Handle validation errors
+            const errors = Object.values(err.error.errors).flat();
+            errorMessage = errors.join(', ');
+          }
+        } else if (err.status === 401) {
+          errorMessage = "Unauthorized. Please login again.";
+        } else if (err.status === 403) {
+          errorMessage = "You don't have permission to create users.";
+        } else if (err.status === 500) {
+          errorMessage = "Server error. Please try again later.";
+        }
+        
+        console.log('Final Error Message:', errorMessage);
+        alert(errorMessage);
       }
     });
   }
 
   update(fd: FormData) {
+    console.log('=== UPDATE USER REQUEST ===');
+    console.log('FormData contents:');
+    fd.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
+
     this.userService.updateUser(fd).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('=== UPDATE USER SUCCESS ===');
+        console.log('Response:', response);
         this.saving = false;
-        alert("User updated successfully");
-        this.router.navigate(['/users']);
+        this.successMessage = "User updated successfully";
+        
+        setTimeout(() => {
+          this.router.navigate(['/users']);
+        }, 3000);
       },
       error: (err) => {
+        console.error('=== UPDATE USER ERROR ===');
+        console.error('Full Error:', err);
+        console.error('Status:', err.status);
+        console.error('Error Body:', err.error);
+        
         this.saving = false;
-        console.error("Update Error:", err);
-        const msg = err?.error || err?.message || "Error updating user";
-        alert(msg);
+        
+        let errorMessage = "Error updating user";
+        
+        if (err.status === 400) {
+          if (typeof err.error === 'string') {
+            errorMessage = err.error;
+          } else if (err.error?.message) {
+            errorMessage = err.error.message;
+          } else if (err.error?.Message) {
+            errorMessage = err.error.Message;
+          } else if (err.error?.errors) {
+            const errors = Object.values(err.error.errors).flat();
+            errorMessage = errors.join(', ');
+          }
+        } else if (err.status === 401) {
+          errorMessage = "Unauthorized. Please login again.";
+        } else if (err.status === 403) {
+          errorMessage = "You don't have permission to update users.";
+        } else if (err.status === 500) {
+          errorMessage = "Server error. Please try again later.";
+        } else if (err.error) {
+          if (typeof err.error === 'object' && err.error.message) {
+            errorMessage = err.error.message;
+          } else if (typeof err.error === 'string') {
+            errorMessage = err.error;
+          }
+        }
+        
+        console.log('Final Error Message:', errorMessage);
+        alert(errorMessage);
       }
     });
   }

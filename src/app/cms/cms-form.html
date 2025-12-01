@@ -1,6 +1,12 @@
 <div class="cms-container">
   <h2>{{ mode === 'add' ? 'Add CMS' : 'Edit CMS' }}</h2>
 
+  <!-- Success Message -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <i class="fa-solid fa-circle-check"></i>
+    {{ successMessage }}
+  </div>
+
   <form [formGroup]="form" (ngSubmit)="submit()">
 
     <!-- KEY -->
@@ -9,7 +15,11 @@
       <input
         type="text"
         formControlName="key"
+        placeholder="Enter unique key (e.g., about-us)"
+        maxlength="50"
         class="form-control"
+        (input)="onKeyInput()"
+        (blur)="onKeyBlur()"
         [ngClass]="{
           'is-invalid': form['controls']['key'].touched &&
                         form['controls']['key'].invalid
@@ -17,8 +27,20 @@
       />
 
       <div class="error" *ngIf="form['controls']['key'].touched &&
-                               form['controls']['key'].invalid">
+                               form['controls']['key'].hasError('required')">
         Key is required
+      </div>
+      <div class="error" *ngIf="form['controls']['key'].touched &&
+                               form['controls']['key'].hasError('minlength')">
+        Key must be at least 2 characters
+      </div>
+      <div class="error" *ngIf="form['controls']['key'].touched &&
+                               form['controls']['key'].hasError('maxlength')">
+        Key cannot exceed 50 characters
+      </div>
+      <div class="error" *ngIf="form['controls']['key'].touched &&
+                               form['controls']['key'].hasError('pattern')">
+        Key can only contain letters, numbers, hyphens, and underscores
       </div>
     </div>
 
@@ -28,7 +50,11 @@
       <input
         type="text"
         formControlName="title"
+        placeholder="Enter page title"
+        maxlength="100"
         class="form-control"
+        (input)="onTitleInput()"
+        (blur)="onTitleBlur()"
         [ngClass]="{
           'is-invalid': form['controls']['title'].touched &&
                         form['controls']['title'].invalid
@@ -36,8 +62,16 @@
       />
 
       <div class="error" *ngIf="form['controls']['title'].touched &&
-                               form['controls']['title'].invalid">
+                               form['controls']['title'].hasError('required')">
         Title is required
+      </div>
+      <div class="error" *ngIf="form['controls']['title'].touched &&
+                               form['controls']['title'].hasError('minlength')">
+        Title must be at least 3 characters
+      </div>
+      <div class="error" *ngIf="form['controls']['title'].touched &&
+                               form['controls']['title'].hasError('maxlength')">
+        Title cannot exceed 100 characters
       </div>
     </div>
 
@@ -47,7 +81,10 @@
       <input
         type="text"
         formControlName="metaKeyword"
+        placeholder="Enter meta keywords (comma separated)"
+        maxlength="200"
         class="form-control"
+        (blur)="onMetaKeywordBlur()"
         [ngClass]="{
           'is-invalid': form['controls']['metaKeyword'].touched &&
                         form['controls']['metaKeyword'].invalid
@@ -55,8 +92,12 @@
       />
 
       <div class="error" *ngIf="form['controls']['metaKeyword'].touched &&
-                               form['controls']['metaKeyword'].invalid">
+                               form['controls']['metaKeyword'].hasError('required')">
         Meta keyword is required
+      </div>
+      <div class="error" *ngIf="form['controls']['metaKeyword'].touched &&
+                               form['controls']['metaKeyword'].hasError('maxlength')">
+        Meta keyword cannot exceed 200 characters
       </div>
     </div>
 
@@ -78,6 +119,7 @@
         [config]="editorConfig"
         formControlName="content"
         (ready)="onEditorReady($event)"
+        (blur)="onContentBlur()"
       ></ckeditor>
 
       <div class="error" *ngIf="form['controls']['content'].touched &&

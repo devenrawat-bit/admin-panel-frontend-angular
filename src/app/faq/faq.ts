@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FaqService, Faq as FaqModel } from './faq.service';
+import { ModalService } from '../shared/modal/modal.service';
 
 @Component({
   selector: 'app-faq',
@@ -27,7 +28,11 @@ export class Faq implements OnInit {
   sortField = 'CreatedAt';
   sortOrder: 'asc' | 'desc' = 'desc';
 
-  constructor(private faqService: FaqService, private router: Router) {}
+  constructor(
+    private faqService: FaqService, 
+    private router: Router,
+    private modalService: ModalService
+  ) {}
 
   ngOnInit() {
     this.loadFaqs();
@@ -149,70 +154,28 @@ export class Faq implements OnInit {
     });
   }
 
-  deleteFaq(faq: FaqModel) {
-    if (!confirm(`Are you sure you want to delete this FAQ: "${faq.question}"?`)) {
-      return;
-    }
+  async deleteFaq(faq: FaqModel) {
+    const confirmed = await this.modalService.confirm(
+      'Delete FAQ',
+      `Are you sure you want to delete this FAQ: "${faq.question}"?`
+    );
 
-    console.log('=== DELETING FAQ ===');
-    console.log('FAQ object:', faq);
-    console.log('FAQ ID:', faq.id);
-    console.log('FAQ ID type:', typeof faq.id);
+    if (!confirmed) return;
 
     this.faqService.deleteFaq(faq.id).subscribe({
       next: (response) => {
-        console.log('=== DELETE FAQ SUCCESS ===');
-        console.log('Full response:', response);
-        console.log('Response type:', typeof response);
-        
-        // Backend returns: { success: true/false, message: "..." }
-        if (response && typeof response === 'object') {
-          if (response.success === true) {
-            // Success - just reload without alert
-            console.log('FAQ deleted successfully:', response.message);
-            this.loadFaqs();
-          } else {
-            // Backend returned success: false
-            alert(response.message || 'Failed to delete FAQ');
-          }
-        } else if (typeof response === 'string') {
-          // String response
-          console.log('FAQ deleted:', response);
-          this.loadFaqs();
-        } else {
-          // Unknown format - just reload
-          this.loadFaqs();
-        }
+        this.modalService.success('Success', 'FAQ deleted successfully');
+        this.loadFaqs();
       },
       error: (err) => {
-        console.error('=== DELETE FAQ ERROR ===');
-        console.error('Full error:', err);
-        console.error('Error status:', err.status);
-        console.error('Error error:', err.error);
-        
-        // Only show error if it's a real error (not a success message)
-        if (err.error && typeof err.error === 'object') {
-          if (err.error.success === true) {
-            // Backend returned success but as HTTP error status
-            console.log('FAQ deleted (success in error):', err.error.message);
-            this.loadFaqs();
-          } else if (err.error.message) {
-            // Real error with message
-            alert(err.error.message);
-          } else {
-            alert('Failed to delete FAQ');
-          }
-        } else if (typeof err.error === 'string') {
-          // Check if string indicates success
-          if (err.error.toLowerCase().includes('success') || 
-              err.error.toLowerCase().includes('deleted')) {
-            console.log('FAQ deleted (string success in error)');
-            this.loadFaqs();
-          } else {
-            alert(err.error);
-          }
+        console.error('=== DELETE FAQ ERROR ===', err);
+        // Check if it's actually a success message in disguise (as seen in previous logs)
+        if (err.error && typeof err.error === 'string' && 
+           (err.error.toLowerCase().includes('success') || err.error.toLowerCase().includes('deleted'))) {
+             this.modalService.success('Success', 'FAQ deleted successfully');
+             this.loadFaqs();
         } else {
-          alert('Failed to delete FAQ');
+             this.modalService.success('Error', 'Failed to delete FAQ');
         }
       },
     });

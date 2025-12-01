@@ -69,8 +69,12 @@
         </td>
 
         <td class="actions">
-          <button class="edit-btn" (click)="goToEdit(role)">✏️</button>
-          <button class="delete-btn" (click)="deleteRole(role)">🗑️</button>
+          <button class="edit-btn" (click)="goToEdit(role)" title="Edit">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+          <button class="delete-btn" (click)="deleteRole(role)" title="Delete">
+            <i class="fa-solid fa-trash"></i>
+          </button>
         </td>
       </tr>
 

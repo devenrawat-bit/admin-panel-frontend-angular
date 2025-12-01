@@ -1,9 +1,9 @@
-// src/app/roles/roles.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RoleService, RoleDto } from './role.service';
+import { ModalService } from '../shared/modal/modal.service';
 
 @Component({
   selector: 'app-roles',
@@ -25,18 +25,26 @@ export class Roles {
   pageSize = 10;
   totalItems = 0;
 
-  // sorting - default to CreatedAt descending (newest first)
-  sortColumn: string = 'CreatedAt';
+  // sorting - default to CreatedOn descending (newest first)
+  sortColumn: string = 'CreatedOn';
   sortDirection: 'asc' | 'desc' = 'desc';
 
   loading = false;
 
   constructor(
     private roleService: RoleService,
-    private router: Router
+    private router: Router,
+    private modalService: ModalService
   ) {}
 
   ngOnInit() {
+    // Check if we need to reset sorting (after creating a new role)
+    if (localStorage.getItem('role_reset_sort')) {
+      this.sortColumn = 'CreatedOn';
+      this.sortDirection = 'desc';
+      this.page = 1;
+      localStorage.removeItem('role_reset_sort');
+    }
     this.loadRoles();
   }
 
@@ -157,16 +165,22 @@ export class Roles {
     this.router.navigate(['/roles/edit', role.id]);
   }
 
-  deleteRole(role: RoleDto) {
-    if (!confirm(`Delete role "${role.name}" ?`)) return;
+  async deleteRole(role: RoleDto) {
+    const confirmed = await this.modalService.confirm(
+      'Delete Role',
+      `Are you sure you want to delete "${role.name}"?`
+    );
+
+    if (!confirmed) return;
 
     this.roleService.deleteRole(role.id).subscribe({
       next: () => {
+        this.modalService.success('Success', 'Role deleted successfully');
         this.loadRoles();
       },
       error: (err) => {
         console.error('❌ Error deleting role:', err);
-        alert('Error deleting role');
+        this.modalService.success('Error', 'Failed to delete role');
       },
     });
   }

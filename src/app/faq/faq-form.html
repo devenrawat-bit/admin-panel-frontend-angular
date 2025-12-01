@@ -8,6 +8,12 @@
 
   <h2>{{ mode === 'add' ? 'Add FAQ' : 'Edit FAQ' }}</h2>
 
+  <!-- Success Message -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <i class="fa-solid fa-circle-check"></i>
+    {{ successMessage }}
+  </div>
+
   <form [formGroup]="form" (ngSubmit)="submit()" class="faq-form">
     <!-- Question Field -->
     <div class="form-field">
@@ -16,6 +22,7 @@
         type="text"
         formControlName="question"
         placeholder="Enter question"
+        maxlength="500"
         [class.error]="hasError('question')"
       />
       <div class="error-text" *ngIf="hasError('question')">

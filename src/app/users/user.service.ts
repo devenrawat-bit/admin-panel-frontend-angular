@@ -42,7 +42,15 @@ export class UserService {
 
   // dropdown APIs
   getRoles() {
-    return this.http.get<any>(`${this.baseUrl}/Role/get-roles`);
+    const payload = {
+      page: 1,
+      pageSize: 100, // Get all roles
+      search: "",
+      sortColumn: "name",
+      sortDirection: "asc",
+      filters: {}
+    };
+    return this.http.post<any>(`${this.baseUrl}/Role/get-roles`, payload);
   }
 
   getCountries() {

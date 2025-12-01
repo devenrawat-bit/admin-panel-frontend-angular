@@ -18,12 +18,30 @@ interface LoginResponse {
 })
 export class Auth {
   private apiUrl = "https://localhost:7065/api/Auth/Login";
+  private forgotPasswordUrl = "https://localhost:7065/api/Auth/forgot-password";
+  private resetPasswordUrl = "https://localhost:7065/api/Auth/reset-password";
 
   constructor(private http: HttpClient) {}
 
   login(email: string, password: string): Observable<LoginResponse> {
     const credentials = { email, password };
     return this.http.post<LoginResponse>(this.apiUrl, credentials);
+  }
+
+  forgotPassword(email: string, clientResetUrl: string): Observable<any> {
+    return this.http.post(this.forgotPasswordUrl, { 
+      email, 
+      clientResetUrl 
+    });
+  }
+
+  resetPassword(email: string, token: string, newPassword: string): Observable<any> {
+    return this.http.post(this.resetPasswordUrl, { 
+      email, 
+      token, 
+      newPassword,
+      confirmPassword: newPassword // Backend might expect this
+    });
   }
 
   // ✔ Correct storeToken with new response structure

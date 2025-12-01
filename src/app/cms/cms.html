@@ -92,11 +92,11 @@
               </label>
             </td>
             <td class="actions">
-              <button class="icon-btn" (click)="goToEdit(item)">
-                ✏️
+              <button class="edit-btn" (click)="goToEdit(item)" title="Edit">
+                <i class="fa-solid fa-pen-to-square"></i>
               </button>
-              <button class="icon-btn danger" (click)="deleteCms(item)">
-                🗑️
+              <button class="delete-btn" (click)="deleteCms(item)" title="Delete">
+                <i class="fa-solid fa-trash"></i>
               </button>
             </td>
           </tr>

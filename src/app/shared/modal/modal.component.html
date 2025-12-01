@@ -1,0 +1,33 @@
+<div class="modal-overlay" *ngIf="config" (click)="cancel()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    
+    <!-- Icon -->
+    <div class="modal-icon" [ngClass]="config.type">
+      <i class="fa-solid fa-trash" *ngIf="config.type === 'confirm'"></i>
+      <i class="fa-solid fa-check" *ngIf="config.type === 'success'"></i>
+      <i class="fa-solid fa-circle-exclamation" *ngIf="config.type === 'error'"></i>
+    </div>
+
+    <!-- Content -->
+    <h3 class="modal-title">{{ config.title }}</h3>
+    <p class="modal-message">{{ config.message }}</p>
+
+    <!-- Actions -->
+    <div class="modal-actions">
+      <button 
+        *ngIf="config.type === 'confirm'" 
+        class="btn-cancel" 
+        (click)="cancel()">
+        {{ config.cancelText || 'Cancel' }}
+      </button>
+      
+      <button 
+        class="btn-confirm" 
+        [ngClass]="config.type"
+        (click)="confirm()">
+        {{ config.confirmText || 'OK' }}
+      </button>
+    </div>
+
+  </div>
+</div>
