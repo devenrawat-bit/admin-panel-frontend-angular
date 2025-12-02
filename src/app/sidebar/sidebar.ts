@@ -50,7 +50,12 @@ export class Sidebar implements OnInit {
       this.user.role = roles;
     }
     if (profileUrl && profileUrl.trim()) {
-      this.user.profileImage = profileUrl;
+      if (profileUrl.startsWith('http')) {
+        this.user.profileImage = profileUrl;
+      } else {
+        const cleanUrl = profileUrl.startsWith('/') ? profileUrl.substring(1) : profileUrl;
+        this.user.profileImage = `https://localhost:7065/${cleanUrl}`;
+      }
     }
     
     console.log("Sidebar user data loaded:", this.user);

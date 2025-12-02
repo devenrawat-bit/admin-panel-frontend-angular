@@ -122,6 +122,12 @@ export class Users {
       
       this.users = data;
       this.totalItems = total;
+      
+      if (this.users.length > 0) {
+        console.log('🔍 First user object keys:', Object.keys(this.users[0]));
+        console.log('🔍 First user object:', this.users[0]);
+      }
+      
       this.loading = false;
     },
     error: (err: any) => {
@@ -188,6 +194,19 @@ export class Users {
       return user.roles.join(', ');
     }
     return user.roles || '';
+  }
+
+  getImageUrl(url: string): string {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    
+    // Base URL for the backend API
+    const baseUrl = 'https://localhost:7065';
+    
+    // Remove leading slash if present to avoid double slashes
+    const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+    
+    return `${baseUrl}/${cleanUrl}`;
   }
 
   toggleActive(user: any) {

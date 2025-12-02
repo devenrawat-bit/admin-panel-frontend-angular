@@ -50,7 +50,8 @@
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--gray-200);
 
-  input, select {
+  input,
+  select {
     padding: 10px 14px;
     border-radius: var(--radius-md);
     border: 1px solid var(--gray-300);
@@ -104,7 +105,8 @@
     padding: 12px;
     gap: 8px;
 
-    input, select {
+    input,
+    select {
       padding: 8px 12px;
       font-size: 13px;
     }
@@ -188,7 +190,7 @@
       width: 18px;
     }
 
-    input:checked + .slider::before {
+    input:checked+.slider::before {
       transform: translateX(18px);
     }
   }
@@ -222,6 +224,7 @@
 
     &:last-child {
       cursor: default;
+
       &:hover {
         background: var(--gray-50);
       }
@@ -239,6 +242,26 @@
     border-top: 1px solid var(--gray-200);
     font-size: 14px;
     color: var(--text-primary);
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--gray-200);
+    }
+
+    .user-avatar-placeholder {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-tertiary);
+      font-size: 18px;
+    }
   }
 
   tbody tr {
@@ -277,11 +300,11 @@
   }
 }
 
-.edit-btn { 
+.edit-btn {
   color: var(--accent-blue);
 }
 
-.delete-btn { 
+.delete-btn {
   color: var(--accent-red);
 }
 
@@ -395,11 +418,11 @@
     }
   }
 
-  input:checked + .slider {
+  input:checked+.slider {
     background: var(--accent-green);
   }
 
-  input:checked + .slider::before {
+  input:checked+.slider::before {
     transform: translateX(22px);
   }
 

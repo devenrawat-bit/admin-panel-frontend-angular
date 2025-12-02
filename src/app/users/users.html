@@ -51,6 +51,7 @@
   <table class="users-table">
     <thead>
       <tr>
+        <th>Image</th>
         <th (click)="sortBy('FullName')">
           Name
           <span class="sort-icon">{{ getSortIcon('FullName') }}</span>
@@ -77,6 +78,16 @@
 
     <tbody>
       <tr *ngFor="let user of users">
+        <td>
+          <ng-container *ngIf="user.profileUrl || user.profileImage || user.ProfileUrl || user.profileImageUrl; else noImage">
+            <img [src]="getImageUrl(user.profileUrl || user.profileImage || user.ProfileUrl || user.profileImageUrl)" class="user-avatar" alt="Profile" />
+          </ng-container>
+          <ng-template #noImage>
+            <div class="user-avatar-placeholder">
+              <i class="fa-solid fa-user"></i>
+            </div>
+          </ng-template>
+        </td>
         <td>{{ user.fullName }}</td>
         <td>{{ user.email }}</td>
         <td>{{ user.phoneNumber || '-' }}</td>

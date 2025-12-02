@@ -31,7 +31,14 @@ export class Navbar implements OnInit {
     
     if (fullName) this.user.name = fullName;
     if (roles) this.user.role = roles;
-    if (profileUrl) this.user.profileImage = profileUrl;
+    if (profileUrl) {
+      if (profileUrl.startsWith('http')) {
+        this.user.profileImage = profileUrl;
+      } else {
+        const cleanUrl = profileUrl.startsWith('/') ? profileUrl.substring(1) : profileUrl;
+        this.user.profileImage = `https://localhost:7065/${cleanUrl}`;
+      }
+    }
   }
 
   onToggleSidebar() {
