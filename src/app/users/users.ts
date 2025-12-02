@@ -214,6 +214,8 @@ export class Users {
     
     const fd = new FormData();
     
+    // ✅ FIXED: Added missing Id field required by backend
+    fd.append('Id', user.id || '');
     fd.append('Email', user.email || '');
     fd.append('FullName', user.fullName || '');
     fd.append('Role', this.getRoleDisplay(user));

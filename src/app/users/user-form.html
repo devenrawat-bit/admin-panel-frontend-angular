@@ -34,27 +34,20 @@
         <input type="email"
                formControlName="email"
                placeholder="Enter email"
-               maxlength="100"
+               maxlength="255"
                [readonly]="mode === 'edit'"
-               [class.error]="hasError('email', 'required') || hasError('email', 'pattern')">
+               [class.error]="hasError('email', 'required') || 
+                              hasError('email', 'pattern') || 
+                              hasError('email', 'maxlength') ||
+                              hasError('email', 'emailLocalTooLong') ||
+                              hasError('email', 'emailDomainTooLong')">
 
         <div class="error-text" *ngIf="hasError('email', 'required')">Email is required</div>
-        <div class="error-text" *ngIf="hasError('email', 'pattern')">Enter a valid email</div>
+        <div class="error-text" *ngIf="hasError('email', 'pattern')">Enter a valid email address</div>
+        <div class="error-text" *ngIf="hasError('email', 'maxlength')">Email cannot exceed 255 characters</div>
+        <div class="error-text" *ngIf="hasError('email', 'emailLocalTooLong')">Email username (before @) cannot exceed 64 characters</div>
+        <div class="error-text" *ngIf="hasError('email', 'emailDomainTooLong')">Email domain (after @) cannot exceed 253 characters</div>
         <div class="error-text" *ngIf="hasError('email', 'emailTaken')">Email is already taken</div>
-      </div>
-
-      <div class="form-field" *ngIf="mode === 'add'">
-        <label>Password<span class="required">*</span></label>
-        <input type="password"
-               formControlName="password"
-               placeholder="Enter password"
-               maxlength="50"
-               [class.error]="hasError('password', 'required') || hasError('password', 'pattern')">
-
-        <div class="error-text" *ngIf="hasError('password', 'required')">Password is required</div>
-        <div class="error-text" *ngIf="hasError('password','pattern')">
-          Password must be 8–50 chars with 1 uppercase, 1 number, 1 special character.
-        </div>
       </div>
     </div>
 
@@ -76,7 +69,32 @@
         </div>
       </div>
 
-      <div class="form-field">
+      <div class="form-field" *ngIf="mode === 'add'">
+        <label>Password<span class="required">*</span></label>
+        <input type="password"
+               formControlName="password"
+               placeholder="Enter password"
+               maxlength="50"
+               [class.error]="hasError('password', 'required') || hasError('password', 'pattern')">
+
+        <div class="error-text" *ngIf="hasError('password', 'required')">Password is required</div>
+        <div class="error-text" *ngIf="hasError('password','pattern')">
+          Password must be 8–50 chars with 1 uppercase, 1 number, 1 special character.
+        </div>
+      </div>
+
+      <div class="form-field" *ngIf="mode === 'edit'">
+        <label>Role<span class="required">*</span></label>
+        <select formControlName="role" [class.error]="hasError('role', 'required')">
+          <option value="">Select role</option>
+          <option *ngFor="let r of roles" [value]="r.name">{{ r.name }}</option>
+        </select>
+        <div class="error-text" *ngIf="hasError('role', 'required')">Role is required</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field" *ngIf="mode === 'add'">
         <label>Role<span class="required">*</span></label>
         <select formControlName="role" [class.error]="hasError('role', 'required')">
           <option value="">Select role</option>
@@ -119,7 +137,9 @@
         </select>
         <div class="error-text" *ngIf="hasError('countryId', 'required')">Country is required</div>
       </div>
+    </div>
 
+    <div class="form-row">
       <div class="form-field">
         <label>State<span class="required">*</span></label>
         <select formControlName="stateId"
@@ -130,9 +150,7 @@
         </select>
         <div class="error-text" *ngIf="hasError('stateId', 'required')">State is required</div>
       </div>
-    </div>
 
-    <div class="form-row">
       <div class="form-field">
         <label>City<span class="required">*</span></label>
         <select formControlName="cityId" [class.error]="hasError('cityId', 'required')">
@@ -143,7 +161,9 @@
           City is required
         </div>
       </div>
+    </div>
 
+    <div class="form-row">
       <div class="form-field">
         <label>Profile Image (Max 5MB)</label>
         <input type="file" (change)="onFileChange($event)" accept="image/*">

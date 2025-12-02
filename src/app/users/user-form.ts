@@ -104,7 +104,13 @@ export class UserForm {
         '',
         [
           Validators.required,
-          Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)
+          Validators.maxLength(255), // RFC 5322 max email length
+          // Industry-standard email validation:
+          // - Local part (before @): max 64 chars, alphanumeric + ._%+-
+          // - Domain: max 253 chars, proper domain structure
+          // - TLD: 2-63 chars (supports new TLDs like .museum)
+          Validators.pattern(/^[a-zA-Z0-9][a-zA-Z0-9._%+-]{0,63}@[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,63}$/),
+          this.emailLengthValidator()
         ],
         [this.emailValidator()]
       ],
@@ -158,6 +164,35 @@ export class UserForm {
           );
         })
       );
+    };
+  }
+
+  // Validates email length according to RFC 5322 standards
+  emailLengthValidator() {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      
+      const email = control.value.toString();
+      const parts = email.split('@');
+      
+      if (parts.length !== 2) {
+        return null; // Let pattern validator handle this
+      }
+      
+      const localPart = parts[0];
+      const domainPart = parts[1];
+      
+      // RFC 5322: Local part max 64 chars
+      if (localPart.length > 64) {
+        return { emailLocalTooLong: true };
+      }
+      
+      // RFC 5322: Domain part max 253 chars
+      if (domainPart.length > 253) {
+        return { emailDomainTooLong: true };
+      }
+      
+      return null;
     };
   }
 
@@ -429,6 +464,14 @@ export class UserForm {
           errors.push('Email is required');
         } else if (this.form.get('email')?.hasError('pattern')) {
           errors.push('Please enter a valid email address');
+        } else if (this.form.get('email')?.hasError('maxlength')) {
+          errors.push('Email cannot exceed 255 characters');
+        } else if (this.form.get('email')?.hasError('emailLocalTooLong')) {
+          errors.push('Email username (before @) cannot exceed 64 characters');
+        } else if (this.form.get('email')?.hasError('emailDomainTooLong')) {
+          errors.push('Email domain (after @) cannot exceed 253 characters');
+        } else if (this.form.get('email')?.hasError('emailTaken')) {
+          errors.push('This email is already registered');
         }
       }
       

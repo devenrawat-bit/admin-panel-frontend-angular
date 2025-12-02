@@ -160,35 +160,36 @@ export class EditRole {
     this.errorMessage = '';
     this.validationErrors = {};
 
-    // Client-side validation
+    // Client-side validation - collect all errors
+    let hasErrors = false;
+
+    // Validate name
     if (!this.name || this.name.trim().length === 0) {
       this.validationErrors['name'] = 'Role name is required';
-      return;
-    }
-
-    if (this.name.trim().length < 2) {
+      hasErrors = true;
+    } else if (this.name.trim().length < 2) {
       this.validationErrors['name'] = 'Role name must be at least 2 characters';
-      return;
-    }
-
-    if (this.name.trim().length > 50) {
+      hasErrors = true;
+    } else if (this.name.trim().length > 50) {
       this.validationErrors['name'] = 'Role name cannot exceed 50 characters';
-      return;
+      hasErrors = true;
     }
 
-    // Description is now required
+    // Validate description
     if (!this.description || this.description.trim().length === 0) {
       this.validationErrors['description'] = 'Short description is required';
-      return;
-    }
-
-    if (this.description.trim().length < 10) {
+      hasErrors = true;
+    } else if (this.description.trim().length < 10) {
       this.validationErrors['description'] = 'Short description must be at least 10 characters';
-      return;
+      hasErrors = true;
+    } else if (this.description.trim().length > 100) {
+      this.validationErrors['description'] = 'Short description cannot exceed 100 characters';
+      hasErrors = true;
     }
 
-    if (this.description.trim().length > 100) {
-      this.validationErrors['description'] = 'Short description cannot exceed 100 characters';
+    // If there are validation errors, stop here
+    if (hasErrors) {
+      this.errorMessage = 'Please fix the validation errors below';
       return;
     }
 

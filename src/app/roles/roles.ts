@@ -203,13 +203,21 @@ export class Roles {
     console.log('Role:', role);
     console.log('New Value:', newValue);
 
+    // ✅ FIXED: Properly handle permissions - ensure it's always an array
+    let permissionsArray: number[];
+    if (Array.isArray(role.permissions)) {
+      permissionsArray = role.permissions;
+    } else if (typeof role.permissions === 'number') {
+      permissionsArray = [role.permissions];
+    } else {
+      permissionsArray = [0];
+    }
+
     const body = {
       name: role.name,
       description: role.description ?? '',
       isActive: newValue,
-      permissions: Array.isArray(role.permissions)
-        ? role.permissions
-        : [role.permissions ?? 0],
+      permissions: permissionsArray,
     };
 
     console.log('Update Body:', body);
