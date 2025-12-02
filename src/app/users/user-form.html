@@ -40,6 +40,7 @@
 
         <div class="error-text" *ngIf="hasError('email', 'required')">Email is required</div>
         <div class="error-text" *ngIf="hasError('email', 'pattern')">Enter a valid email</div>
+        <div class="error-text" *ngIf="hasError('email', 'emailTaken')">Email is already taken</div>
       </div>
 
       <div class="form-field" *ngIf="mode === 'add'">
@@ -161,7 +162,7 @@
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn primary" [disabled]="saving || form.invalid">
+      <button type="submit" class="btn primary" [disabled]="saving">
         {{ saving ? 'Saving...' : 'Submit' }}
       </button>
       <button type="button" class="btn secondary" (click)="cancel()">Cancel</button>

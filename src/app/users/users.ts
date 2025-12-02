@@ -263,7 +263,19 @@ export class Users {
     this.userService.deleteUser(user.id).subscribe({
       next: () => {
         this.modalService.success('Success', 'User deleted successfully');
-        this.loadUsers();
+        
+        // Check if the deleted user is the currently logged-in user
+        const currentUserEmail = localStorage.getItem('email'); // Assuming email is stored in localStorage
+        // Alternatively, check against the name or ID if available in localStorage
+        const currentUserName = localStorage.getItem('fullName');
+        
+        if (user.fullName === currentUserName) {
+           // Clear session and redirect to login
+           localStorage.clear();
+           this.router.navigate(['/login']);
+        } else {
+           this.loadUsers();
+        }
       },
       error: (err) => {
         console.error('Error deleting user', err);

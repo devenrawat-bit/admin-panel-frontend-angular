@@ -2,7 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, of, timer } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { UserService } from './user.service';
+import { ToastService } from '../shared/toast/toast.service';
 
 @Component({
   selector: 'app-user-form',
@@ -37,7 +40,8 @@ export class UserForm {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -101,7 +105,8 @@ export class UserForm {
         [
           Validators.required,
           Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)
-        ]
+        ],
+        [this.emailValidator()]
       ],
 
       password: ['', Validators.required], // Will be set conditionally in ngOnInit
@@ -118,6 +123,42 @@ export class UserForm {
       stateId: [null, Validators.required],
       cityId: [null, Validators.required]
     });
+  }
+
+  emailValidator() {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value) {
+        return of(null);
+      }
+      
+      return timer(500).pipe(
+        switchMap(() => {
+          const payload = {
+            page: 1,
+            pageSize: 1,
+            filters: { email: control.value }
+          };
+          return this.userService.getUsers(payload).pipe(
+            map(res => {
+              const users = res.data || res.Data || res.message?.data || [];
+              
+              if (users.length > 0) {
+                 if (this.mode === 'edit' && this.userId) {
+                    const foundUser = users[0];
+                    const foundId = foundUser.id || foundUser.Id;
+                    // Compare as strings to be safe
+                    if (String(foundId) === String(this.userId)) {
+                        return null; // It's me, so it's fine
+                    }
+                 }
+                 return { emailTaken: true };
+              }
+              return null;
+            })
+          );
+        })
+      );
+    };
   }
 
   validateDateOfBirth(control: AbstractControl): ValidationErrors | null {
@@ -269,7 +310,7 @@ export class UserForm {
         console.log('User FullName:', u?.fullName);
 
         if (!u) {
-          alert("User not found");
+          this.toastService.error("User not found");
           this.router.navigate(['/users']);
           return;
         }
@@ -435,7 +476,7 @@ export class UserForm {
         ? 'Please fix the following errors:\n\n• ' + errors.join('\n• ')
         : 'Please fill all required fields correctly';
       
-      alert(errorMessage);
+      this.toastService.error(errorMessage);
       return;
     }
 
@@ -483,7 +524,7 @@ export class UserForm {
         console.log('=== CREATE USER SUCCESS ===');
         console.log('Response:', response);
         this.saving = false;
-        this.successMessage = "User created successfully";
+        this.toastService.success("User created successfully");
         
         setTimeout(() => {
           this.router.navigate(['/users']);
@@ -519,7 +560,7 @@ export class UserForm {
         }
         
         console.log('Final Error Message:', errorMessage);
-        alert(errorMessage);
+        this.toastService.error(errorMessage);
       }
     });
   }
@@ -533,7 +574,7 @@ export class UserForm {
     });
 
     if (!this.userId) {
-      alert('Error: User ID is missing');
+      this.toastService.error('Error: User ID is missing');
       this.saving = false;
       return;
     }
@@ -543,7 +584,7 @@ export class UserForm {
         console.log('=== UPDATE USER SUCCESS ===');
         console.log('Response:', response);
         this.saving = false;
-        this.successMessage = "User updated successfully";
+        this.toastService.success("User updated successfully");
         
         setTimeout(() => {
           this.router.navigate(['/users']);
@@ -585,7 +626,7 @@ export class UserForm {
         }
         
         console.log('Final Error Message:', errorMessage);
-        alert(errorMessage);
+        this.toastService.error(errorMessage);
       }
     });
   }
