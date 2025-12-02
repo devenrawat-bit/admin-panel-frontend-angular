@@ -1,9 +1,7 @@
 import { Component, AfterViewInit, signal } from '@angular/core';
 import { Auth } from '../auth/auth';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-// import { NgIf } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
 
 @Component({
   selector: 'app-login',
@@ -13,7 +11,8 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./login.scss'],
 })
 export class Login implements AfterViewInit {
-   errorMessage = signal("");
+  errorMessage = signal("");
+
   constructor(private auth: Auth, private router: Router) {}
 
   ngAfterViewInit() {
@@ -22,57 +21,92 @@ export class Login implements AfterViewInit {
     const passwordInput = document.getElementById('password') as HTMLInputElement;
     const emailError = document.getElementById('emailError')!;
     const passwordError = document.getElementById('passwordError')!;
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
+    // Project standard email regex
+    const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]{0,63}@[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,63}$/;
 
-    // Add input restriction for email field
-    if (emailInput) {
-      emailInput.addEventListener('input', (e) => {
-        const target = e.target as HTMLInputElement;
-        // Only allow letters, numbers, dots, underscores, hyphens, and @
-        target.value = target.value.replace(/[^a-zA-Z0-9._@-]/g, '');
-      });
+    let emailTouched = false;
 
-      // Validate email on blur (clicking outside)
-      emailInput.addEventListener('blur', () => {
-        const email = emailInput.value.trim();
-        
-        emailError.textContent = "";
-        emailError.classList.remove("visible");
+    const validateEmail = () => {
+      const email = emailInput.value.trim();
+      emailError.textContent = "";
+      emailError.classList.remove("visible");
 
-        if (!email) {
+      if (!email) {
+        if (emailTouched) {
           emailError.textContent = "Email is required";
           emailError.classList.add("visible");
-        } else if (!emailRegex.test(email)) {
+        }
+      } else if (!emailRegex.test(email)) {
+        if (emailTouched) {
           emailError.textContent = "Please enter a valid email address";
           emailError.classList.add("visible");
         }
+      }
+    };
+
+    // Email Listeners
+    if (emailInput) {
+      emailInput.addEventListener('input', () => {
+        if (emailError.classList.contains('visible')) {
+           emailTouched = true;
+           validateEmail();
+        }
       });
 
-      // Clear error on focus
-      emailInput.addEventListener('focus', () => {
-        emailError.textContent = "";
-        emailError.classList.remove("visible");
+      emailInput.addEventListener('blur', () => {
+        emailTouched = true;
+        validateEmail();
       });
     }
 
-    // Validate password on blur (clicking outside) - Simple validation for login
+    // Password Listeners
     if (passwordInput) {
-      passwordInput.addEventListener('blur', () => {
+      let passwordTouched = false;
+
+      const validatePassword = () => {
         const password = passwordInput.value.trim();
-        
         passwordError.textContent = "";
         passwordError.classList.remove("visible");
+
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
         if (!password) {
           passwordError.textContent = "Password is required";
           passwordError.classList.add("visible");
+        } else if (password.length < 8) {
+          passwordError.textContent = "Password must be at least 8 characters";
+          passwordError.classList.add("visible");
+        } else if (!hasUpperCase) {
+          passwordError.textContent = "Password must contain at least one uppercase letter";
+          passwordError.classList.add("visible");
+        } else if (!hasNumber) {
+          passwordError.textContent = "Password must contain at least one number";
+          passwordError.classList.add("visible");
+        } else if (!hasSpecialChar) {
+          passwordError.textContent = "Password must contain at least one special character";
+          passwordError.classList.add("visible");
+        }
+      };
+
+      // Real-time validation on input
+      passwordInput.addEventListener('input', () => {
+        // If error is visible, validate immediately to allow clearing the error
+        if (passwordError.classList.contains('visible')) {
+          validatePassword();
+        } 
+        // If they clear the field, show required immediately
+        else if (!passwordInput.value.trim()) {
+           validatePassword();
         }
       });
 
-      // Clear error on focus
-      passwordInput.addEventListener('focus', () => {
-        passwordError.textContent = "";
-        passwordError.classList.remove("visible");
+      // Validation on blur
+      passwordInput.addEventListener('blur', () => {
+        passwordTouched = true;
+        validatePassword();
       });
     }
 
@@ -104,13 +138,14 @@ export class Login implements AfterViewInit {
   }
 
   onSubmit(event: Event) {
-    
     event.preventDefault();
 
-    const email = (document.getElementById('email') as HTMLInputElement).value.trim();
-    const password = (document.getElementById('password') as HTMLInputElement).value.trim();
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]{0,63}@[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,63}$/;
 
     const emailError = document.getElementById('emailError')!;
     const passwordError = document.getElementById('passwordError')!;
@@ -125,8 +160,6 @@ export class Login implements AfterViewInit {
     if (!email) {
       emailError.textContent = "Email is required";
       emailError.classList.add("visible");
-      // emailError.style.display = "block";
-
       isValid = false;
     }
     else if (!emailRegex.test(email)) {
@@ -135,73 +168,73 @@ export class Login implements AfterViewInit {
       isValid = false;
     }
 
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
     if (!password) {
       passwordError.textContent = "Password is required";
+      passwordError.classList.add("visible");
+      isValid = false;
+    } else if (password.length < 8) {
+      passwordError.textContent = "Password must be at least 8 characters";
+      passwordError.classList.add("visible");
+      isValid = false;
+    } else if (!hasUpperCase) {
+      passwordError.textContent = "Password must contain at least one uppercase letter";
+      passwordError.classList.add("visible");
+      isValid = false;
+    } else if (!hasNumber) {
+      passwordError.textContent = "Password must contain at least one number";
+      passwordError.classList.add("visible");
+      isValid = false;
+    } else if (!hasSpecialChar) {
+      passwordError.textContent = "Password must contain at least one special character";
       passwordError.classList.add("visible");
       isValid = false;
     }
 
     if (!isValid) return;
 
- this.auth.login(email, password).subscribe({
-  next: (response: any) => {
-    console.log("=== LOGIN SUCCESS ===");
-    console.log("Full Response:", response);
-    console.log("Response keys:", Object.keys(response));
-    console.log("Response.data:", response.data);
-    console.log("Response.Data:", response.Data);
-    
-    // Check if data exists in response
-    const tokenData = response.data || response.Data;
-    
-    if (tokenData) {
-      console.log("Token data found:", tokenData);
-      this.auth.storeToken(tokenData);
-      console.log("Token stored successfully, navigating to dashboard");
-      this.router.navigate(['/dashboard']);
-    } else {
-      console.error("No token data found in response");
-      this.errorMessage.set("Login failed: No token received from server");
-      const errorDiv = document.getElementById('loginErrorMessage');
-      if (errorDiv) {
-        errorDiv.textContent = "Login failed: No token received";
-        errorDiv.classList.add('visible');
+    this.auth.login(email, password).subscribe({
+      next: (response: any) => {
+        console.log("=== LOGIN SUCCESS ===");
+        
+        const tokenData = response.data || response.Data;
+        
+        if (tokenData) {
+          this.auth.storeToken(tokenData);
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.errorMessage.set("Login failed: No token received from server");
+          const errorDiv = document.getElementById('loginErrorMessage');
+          if (errorDiv) {
+            errorDiv.textContent = "Login failed: No token received";
+            errorDiv.classList.add('visible');
+          }
+        }
+      },
+      error: (err: any) => {
+        console.error("=== LOGIN ERROR ===", err);
+        
+        let message = "Invalid email or password";
+        
+        if (err.error) {
+          if (typeof err.error === 'object') {
+            message = err.error.message || err.error.Message || "Invalid email or password";
+          } else if (typeof err.error === 'string') {
+            message = err.error;
+          }
+        }
+        
+        this.errorMessage.set(message);
+        
+        const errorDiv = document.getElementById('loginErrorMessage');
+        if (errorDiv) {
+          errorDiv.textContent = message;
+          errorDiv.classList.add('visible');
+        }
       }
-    }
-  },
-
-  error: (err: any) => {
-    console.error("=== LOGIN ERROR ===");
-    console.error("Full Error Object:", err);
-    console.error("Error Body:", err.error);
-    console.error("Error Status:", err.status);
-    console.error("Error Message:", err.message);
-    
-    // Handle different error response formats
-    let message = "Invalid email or password";
-    
-    if (err.error) {
-      // If error is an object with message property
-      if (typeof err.error === 'object') {
-        message = err.error.message || err.error.Message || "Invalid email or password";
-      }
-      // If error is a string
-      else if (typeof err.error === 'string') {
-        message = err.error;
-      }
-    }
-    
-    console.log("Final Error Message:", message);
-    this.errorMessage.set(message);
-    
-    // Also display error in DOM directly
-    const errorDiv = document.getElementById('loginErrorMessage');
-    if (errorDiv) {
-      errorDiv.textContent = message;
-      errorDiv.classList.add('visible');
-      console.log("Error div updated in DOM");
-    }
+    });
   }
-});
-}
 }
