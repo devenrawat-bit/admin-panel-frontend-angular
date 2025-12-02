@@ -320,7 +320,10 @@ export class UserForm {
         }
 
         if (u.profileImageUrl) {
-          this.previewUrl = u.profileImageUrl;
+          // Prepend backend URL if it's a relative path
+          this.previewUrl = u.profileImageUrl.startsWith('http') 
+            ? u.profileImageUrl 
+            : `https://localhost:7065${u.profileImageUrl}`;
         }
 
         this.loading = false;

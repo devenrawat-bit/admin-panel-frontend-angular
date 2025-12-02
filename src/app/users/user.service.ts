@@ -33,8 +33,8 @@ export class UserService {
   }
 
   updateUser(id: string, fd: FormData): Observable<any> {
-    // Add ID to FormData since backend expects it in the body, not URL
-    fd.append('Id', id);
+    // ID should already be in FormData from the form component
+    // Don't append again to avoid duplicates
     return this.http.put<any>(`${this.baseUrl}/User/edit-user`, fd);
   }
 
