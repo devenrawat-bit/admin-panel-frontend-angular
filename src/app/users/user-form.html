@@ -84,31 +84,34 @@
       </div>
 
       <div class="form-field" *ngIf="mode === 'edit'">
-        <label>Role<span class="required">*</span></label>
-        <select formControlName="role" [class.error]="hasError('role', 'required')">
-          <option value="">Select role</option>
-          <option *ngFor="let r of roles" [value]="r.name">{{ r.name }}</option>
-        </select>
-        <div class="error-text" *ngIf="hasError('role', 'required')">Role is required</div>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-field" *ngIf="mode === 'add'">
-        <label>Role<span class="required">*</span></label>
-        <select formControlName="role" [class.error]="hasError('role', 'required')">
-          <option value="">Select role</option>
-          <option *ngFor="let r of roles" [value]="r.name">{{ r.name }}</option>
-        </select>
-        <div class="error-text" *ngIf="hasError('role', 'required')">Role is required</div>
-      </div>
-
-      <div class="form-field">
         <label>Status<span class="required">*</span></label>
         <select formControlName="isActive">
           <option [ngValue]="true">Active</option>
           <option [ngValue]="false">Inactive</option>
         </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Role<span class="required">*</span></label>
+        <select formControlName="role" [class.error]="hasError('role', 'required')">
+          <option value="">Select role</option>
+          <option *ngFor="let r of roles" [value]="r.name">{{ r.name }}</option>
+        </select>
+        <div class="error-text" *ngIf="hasError('role', 'required')">Role is required</div>
+      </div>
+
+      <div class="form-field" *ngIf="mode === 'add'">
+        <label>Status<span class="required">*</span></label>
+        <select formControlName="isActive">
+          <option [ngValue]="true">Active</option>
+          <option [ngValue]="false">Inactive</option>
+        </select>
+      </div>
+
+      <div class="form-field" *ngIf="mode === 'edit'">
+        <!-- Empty placeholder to maintain layout consistency -->
       </div>
     </div>
 

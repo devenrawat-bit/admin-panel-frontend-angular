@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
+import { loginGuard } from './auth/login.guard';
 
 // AUTH
 import { Login } from './login/login';
@@ -31,7 +32,8 @@ import { FaqForm } from './faq/faq-form';
 
 export const routes: Routes = [
   // -----------------------------
-  // ROOT REDIRECT TO LOGIN
+  // ROOT REDIRECT
+  // If logged in -> dashboard, if not -> login (handled by loginGuard)
   // -----------------------------
   {
     path: '',
@@ -41,18 +43,22 @@ export const routes: Routes = [
 
   // -----------------------------
   // LOGIN STAYS OUTSIDE LAYOUT
+  // Protected by loginGuard to redirect logged-in users to dashboard
   // -----------------------------
   {
     path: 'login',
     component: Login,
+    canActivate: [loginGuard]
   },
   {
     path: 'forgot-password',
     component: ForgotPassword,
+    canActivate: [loginGuard]
   },
   {
     path: 'reset-password',
     component: ResetPassword,
+    canActivate: [loginGuard]
   },
 
   // -----------------------------

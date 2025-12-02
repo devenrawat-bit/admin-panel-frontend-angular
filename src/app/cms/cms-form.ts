@@ -13,6 +13,7 @@ import { CmsService, CmsDto } from './cms.service';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 // @ts-ignore
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { ToastService } from '../shared/toast/toast.service';
 
 @Component({
   selector: 'app-cms-form',
@@ -56,7 +57,8 @@ export class CmsForm implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private cmsService: CmsService
+    private cmsService: CmsService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -174,15 +176,15 @@ export class CmsForm implements OnInit {
       this.cmsService.addCms(body).subscribe({
         next: () => {
           this.saving = false;
-          this.successMessage = 'CMS created successfully';
+          this.toastService.show('CMS created successfully', 'success');
           
           // Set flag in localStorage to reset sorting
           localStorage.setItem('cms_reset_sort', 'true');
           
-          // Navigate without reload after 3 seconds
+          // Navigate without reload after 2 seconds
           setTimeout(() => {
             this.router.navigate(['/cms']);
-          }, 3000);
+          }, 2000);
         },
         error: (err) => {
           console.error('Error adding CMS', err);
@@ -214,11 +216,11 @@ export class CmsForm implements OnInit {
       this.cmsService.updateCms(this.cmsId, body).subscribe({
         next: () => {
           this.saving = false;
-          this.successMessage = 'CMS updated successfully';
+          this.toastService.show('CMS updated successfully', 'success');
           
           setTimeout(() => {
             this.router.navigate(['/cms']);
-          }, 3000);
+          }, 2000);
         },
         error: (err) => {
           console.error('Error updating CMS', err);

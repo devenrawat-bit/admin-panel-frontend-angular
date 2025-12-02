@@ -10,6 +10,7 @@ import {
   decodePermissionsToArray,
 } from './permission.enum';
 import { RoleService } from './role.service';
+import { ToastService } from '../shared/toast/toast.service';
 
 @Component({
   selector: 'app-edit-role',
@@ -43,7 +44,8 @@ export class EditRole {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private roleService: RoleService
+    private roleService: RoleService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -215,16 +217,16 @@ export class EditRole {
           console.log('Response:', response);
           this.saving = false;
           
-          // Show success message
-          this.successMessage = response?.message || 'Role created successfully';
+          // Show toast notification
+          this.toastService.show(response?.message || 'Role created successfully', 'success');
           
-          // Redirect after 3 seconds
+          // Redirect after 2 seconds
           setTimeout(() => {
             localStorage.setItem('role_reset_sort', 'true');
             this.router.navigate(['/roles']).then(() => {
               window.location.reload();
             });
-          }, 3000);
+          }, 2000);
         },
         error: (err) => {
           console.error('=== ADD ROLE ERROR ===');
@@ -278,13 +280,13 @@ export class EditRole {
           console.log('Response:', response);
           this.saving = false;
           
-          // Show success message
-          this.successMessage = response?.message || 'Role updated successfully';
+          // Show toast notification
+          this.toastService.show(response?.message || 'Role updated successfully', 'success');
           
-          // Redirect after 3 seconds
+          // Redirect after 2 seconds
           setTimeout(() => {
             this.router.navigate(['/roles']);
-          }, 3000);
+          }, 2000);
         },
         error: (err) => {
           console.error('=== UPDATE ROLE ERROR ===');

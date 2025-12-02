@@ -6,6 +6,7 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 // @ts-ignore
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { FaqService } from './faq.service';
+import { ToastService } from '../shared/toast/toast.service';
 
 // Custom validator for HTML content
 function htmlContentValidator(minLength: number, maxLength: number) {
@@ -72,7 +73,8 @@ export class FaqForm implements OnInit {
     private fb: FormBuilder,
     private faqService: FaqService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -236,7 +238,7 @@ export class FaqForm implements OnInit {
       next: (response) => {
         console.log('✅ FAQ save response:', response);
         this.saving = false;
-        this.successMessage = 'FAQ saved successfully';
+        this.toastService.show('FAQ saved successfully', 'success');
         
         setTimeout(() => {
           this.router.navigate(['/faq']);

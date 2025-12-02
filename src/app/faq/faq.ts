@@ -163,18 +163,18 @@ export class Faq implements OnInit {
 
     this.faqService.deleteFaq(faq.id).subscribe({
       next: (response) => {
-        this.modalService.success('Success', 'FAQ deleted successfully');
+        this.toastService.show('FAQ deleted successfully', 'success');
         this.loadFaqs();
       },
       error: (err) => {
         console.error('=== DELETE FAQ ERROR ===', err);
-        // Check if it's actually a success message in disguise (as seen in previous logs)
+        // Check if it's actually a success message in disguise
         if (err.error && typeof err.error === 'string' && 
            (err.error.toLowerCase().includes('success') || err.error.toLowerCase().includes('deleted'))) {
-             this.modalService.success('Success', 'FAQ deleted successfully');
+             this.toastService.show('FAQ deleted successfully', 'success');
              this.loadFaqs();
         } else {
-             this.modalService.success('Error', 'Failed to delete FAQ');
+             this.toastService.show('Failed to delete FAQ', 'error');
         }
       },
     });

@@ -180,12 +180,12 @@ export class CmsList {
 
     this.cmsService.deleteCms(item.id).subscribe({
       next: () => {
-        this.modalService.success('Success', 'CMS deleted successfully');
+        this.toastService.show('CMS deleted successfully', 'success');
         this.loadCms();
       },
       error: (err) => {
         console.error('Error deleting CMS', err);
-        this.modalService.success('Error', 'Failed to delete CMS'); // Using success modal for error for now as requested "interactive popup"
+        this.toastService.show('Failed to delete CMS', 'error');
       },
     });
   }

@@ -185,12 +185,12 @@ export class Roles {
 
     this.roleService.deleteRole(role.id).subscribe({
       next: () => {
-        this.modalService.success('Success', 'Role deleted successfully');
+        this.toastService.show('Role deleted successfully', 'success');
         this.loadRoles();
       },
       error: (err) => {
         console.error('❌ Error deleting role:', err);
-        this.modalService.success('Error', 'Failed to delete role');
+        this.toastService.show('Failed to delete role', 'error');
       },
     });
   }
