@@ -33,7 +33,7 @@
   </div>
 
   <!-- Table -->
-  <table class="roles-table" *ngIf="!loading; else loadingTpl">
+  <table class="roles-table">
     <thead>
       <tr>
         <th (click)="sortBy('name')">
@@ -78,15 +78,18 @@
         </td>
       </tr>
 
-      <tr *ngIf="roles.length === 0">
+      <tr *ngIf="!loading && roles.length === 0">
         <td colspan="4" class="no-data">No roles found</td>
+      </tr>
+
+      <tr *ngIf="loading">
+        <td colspan="4" class="loading-cell">
+          <div class="spinner"></div>
+          <span>Loading roles...</span>
+        </td>
       </tr>
     </tbody>
   </table>
-
-  <ng-template #loadingTpl>
-    <div class="loading">Loading roles...</div>
-  </ng-template>
 
   <!-- Pagination -->
   <div class="pagination" *ngIf="totalItems > 0">

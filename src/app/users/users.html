@@ -11,39 +11,43 @@
 
     <input
       type="text"
-      placeholder="Search"
+      placeholder="Search by name..."
       [(ngModel)]="filters.name"
-      (ngModelChange)="loadUsers()"
+      (ngModelChange)="onFilterChange()"
     />
 
     <input
       type="text"
-      placeholder="Search"
+      placeholder="Search by email..."
       [(ngModel)]="filters.email"
-      (ngModelChange)="loadUsers()"
+      (ngModelChange)="onFilterChange()"
     />
 
     <input
       type="text"
-      placeholder="Search"
+      placeholder="Search by phone..."
       [(ngModel)]="filters.phoneNumber"
-      (ngModelChange)="loadUsers()"
+      (ngModelChange)="onFilterChange()"
     />
 
     <input
       type="text"
-      placeholder="Search"
+      placeholder="Search by role..."
       [(ngModel)]="filters.role"
-      (ngModelChange)="loadUsers()"
+      (ngModelChange)="onFilterChange()"
     />
 
-    <select [(ngModel)]="filters.isActive" (ngModelChange)="loadUsers()">
+    <select [(ngModel)]="filters.isActive" (ngModelChange)="onFilterChange()">
       <option value="">All</option>
       <option value="true">Active</option>
       <option value="false">Inactive</option>
     </select>
 
     <button class="btn-clear" (click)="clearFilters()">Clear</button>
+    
+    <div class="search-loader" *ngIf="searching">
+      <div class="spinner-small"></div>
+    </div>
     
   </div>
 
@@ -114,8 +118,15 @@
         </td>
       </tr>
 
-      <tr *ngIf="users.length === 0">
-        <td colspan="6" class="no-data">No users found</td>
+      <tr *ngIf="!loading && users.length === 0">
+        <td colspan="7" class="no-data">No users found</td>
+      </tr>
+      
+      <tr *ngIf="loading">
+        <td colspan="7" class="loading-cell">
+          <div class="spinner"></div>
+          <span>Loading users...</span>
+        </td>
       </tr>
     </tbody>
   </table>

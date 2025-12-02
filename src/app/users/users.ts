@@ -5,6 +5,8 @@ import { RouterLink, Router } from '@angular/router';
 import { UserService } from './user.service';
 import { ModalService } from '../shared/modal/modal.service';
 import { ToastService } from '../shared/toast/toast.service';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-users',
@@ -35,16 +37,40 @@ export class Users {
   sortDirection: 'asc' | 'desc' = 'desc';
 
   loading = false;
+  searching = false;
+
+  // Debounce search
+  private searchSubject = new Subject<void>();
 
   constructor(
     private userService: UserService,
     private router: Router,
     private modalService: ModalService,
     private toastService: ToastService
-  ) {}
+  ) {
+    // Setup debounced search
+    this.searchSubject
+      .pipe(
+        debounceTime(300) // Wait 300ms after user stops typing (faster response)
+      )
+      .subscribe(() => {
+        this.page = 1;
+        this.loadUsers();
+      });
+  }
 
   ngOnInit() {
     this.loadUsers();
+  }
+
+  ngOnDestroy() {
+    this.searchSubject.complete();
+  }
+
+  // Trigger search with debounce
+  onFilterChange() {
+    this.searching = true;
+    this.searchSubject.next();
   }
 
   // 👉 FIXED GETTERS (pagination display)
@@ -56,90 +82,94 @@ export class Users {
     return Math.min(this.page * this.pageSize, this.totalItems);
   }
 
- loadUsers() {
-  this.loading = true;
+  loadUsers() {
+    this.loading = true;
 
-  const payload = {
-    page: this.page,
-    pageSize: this.pageSize,
-    search: "",
-    sortColumn: this.sortColumn,
-    sortDirection: this.sortDirection,
-    filters: {
-      fullName: this.filters.name || "",
-      email: this.filters.email || "",
-      phoneNumber: this.filters.phoneNumber || "",
-      roles: this.filters.role || "",
-      isActive: this.filters.isActive || ""
-    }
-  };
+    // Construct filters dynamically to avoid sending empty strings
+    const filters: any = {};
+    if (this.filters.name) filters.fullName = this.filters.name;
+    if (this.filters.email) filters.email = this.filters.email;
+    if (this.filters.phoneNumber) filters.phoneNumber = this.filters.phoneNumber;
+    if (this.filters.role) filters.roles = this.filters.role;
+    if (this.filters.isActive) filters.isActive = this.filters.isActive;
 
-  console.log("🔍 Loading users with payload:", payload);
+    const payload = {
+      page: this.page,
+      pageSize: this.pageSize,
+      search: "",
+      sortColumn: this.sortColumn,
+      sortDirection: this.sortDirection,
+      filters: filters
+    };
 
-  this.userService.getUsers(payload).subscribe({
-    next: (response: any) => {
-      console.log("📨 Raw response from backend:", response);
-      console.log("📨 Response type:", typeof response);
-      console.log("📨 Response keys:", Object.keys(response || {}));
-      
-      // Try multiple response structure possibilities
-      let data: any[] = [];
-      let total: number = 0;
+    console.log("🔍 Loading users with payload:", payload);
 
-      // Structure 1: { data: [], totalCount: number }
-      if (response?.data && Array.isArray(response.data)) {
-        data = response.data;
-        total = response.totalCount || response.totalItems || response.data.length || 0;
-        console.log("✅ Format 1: Using response.data");
-      }
-      // Structure 2: { Data: [], TotalCount: number } (PascalCase)
-      else if (response?.Data && Array.isArray(response.Data)) {
-        data = response.Data;
-        total = response.TotalCount || response.TotalItems || response.Data.length || 0;
-        console.log("✅ Format 2: Using response.Data (PascalCase)");
-      }
-      // Structure 3: { message: { data: [] } }
-      else if (response?.message?.data && Array.isArray(response.message.data)) {
-        data = response.message.data;
-        total = response.message.totalCount || response.message.totalItems || response.message.data.length || 0;
-        console.log("✅ Format 3: Using response.message.data");
-      }
-      // Structure 4: Direct array response
-      else if (Array.isArray(response)) {
-        data = response;
-        total = response.length;
-        console.log("✅ Format 4: Direct array response");
-      }
-      // Structure 5: { success: true, data: [] }
-      else if (response?.success && response?.data && Array.isArray(response.data)) {
-        data = response.data;
-        total = response.totalCount || response.data.length || 0;
-        console.log("✅ Format 5: Using response.data with success flag");
-      }
+    this.userService.getUsers(payload).subscribe({
+      next: (response: any) => {
+        console.log("📨 Raw response from backend:", response);
+        console.log("📨 Response type:", typeof response);
+        console.log("📨 Response keys:", Object.keys(response || {}));
+        
+        // Try multiple response structure possibilities
+        let data: any[] = [];
+        let total: number = 0;
 
-      console.log("✅ Extracted users:", data);
-      console.log("✅ Total count:", total);
-      
-      this.users = data;
-      this.totalItems = total;
-      
-      if (this.users.length > 0) {
-        console.log('🔍 First user object keys:', Object.keys(this.users[0]));
-        console.log('🔍 First user object:', this.users[0]);
+        // Structure 1: { data: [], totalCount: number }
+        if (response?.data && Array.isArray(response.data)) {
+          data = response.data;
+          total = response.totalCount || response.totalItems || response.data.length || 0;
+          console.log("✅ Format 1: Using response.data");
+        }
+        // Structure 2: { Data: [], TotalCount: number } (PascalCase)
+        else if (response?.Data && Array.isArray(response.Data)) {
+          data = response.Data;
+          total = response.TotalCount || response.TotalItems || response.Data.length || 0;
+          console.log("✅ Format 2: Using response.Data (PascalCase)");
+        }
+        // Structure 3: { message: { data: [] } }
+        else if (response?.message?.data && Array.isArray(response.message.data)) {
+          data = response.message.data;
+          total = response.message.totalCount || response.message.totalItems || response.message.data.length || 0;
+          console.log("✅ Format 3: Using response.message.data");
+        }
+        // Structure 4: Direct array response
+        else if (Array.isArray(response)) {
+          data = response;
+          total = response.length;
+          console.log("✅ Format 4: Direct array response");
+        }
+        // Structure 5: { success: true, data: [] }
+        else if (response?.success && response?.data && Array.isArray(response.data)) {
+          data = response.data;
+          total = response.totalCount || response.data.length || 0;
+          console.log("✅ Format 5: Using response.data with success flag");
+        }
+
+        console.log("✅ Extracted users:", data);
+        console.log("✅ Total count:", total);
+        
+        this.users = data;
+        this.totalItems = total;
+        
+        if (this.users.length > 0) {
+          console.log('🔍 First user object keys:', Object.keys(this.users[0]));
+          console.log('🔍 First user object:', this.users[0]);
+        }
+        
+        this.loading = false;
+        this.searching = false;
+      },
+      error: (err: any) => {
+        console.error("❌ Error loading users:", err);
+        console.error("❌ Error status:", err.status);
+        console.error("❌ Error message:", err.message);
+        this.users = [];
+        this.totalItems = 0;
+        this.loading = false;
+        this.searching = false;
       }
-      
-      this.loading = false;
-    },
-    error: (err: any) => {
-      console.error("❌ Error loading users:", err);
-      console.error("❌ Error status:", err.status);
-      console.error("❌ Error message:", err.message);
-      this.users = [];
-      this.totalItems = 0;
-      this.loading = false;
-    }
-  });
-}
+    });
+  }
 
   changePageSize(size: any) {
     this.pageSize = Number(size);
@@ -264,8 +294,6 @@ export class Users {
 
     this.userService.deleteUser(user.id).subscribe({
       next: () => {
-        this.toastService.show('User deleted successfully', 'success');
-        
         // Check if the deleted user is the currently logged-in user
         const currentUserEmail = localStorage.getItem('email');
         const currentUserName = localStorage.getItem('fullName');
@@ -275,6 +303,14 @@ export class Users {
            localStorage.clear();
            this.router.navigate(['/login']);
         } else {
+           // Remove user from the UI immediately
+           this.users = this.users.filter(u => u.id !== user.id);
+           this.totalItems--;
+           
+           // Show success message
+           this.toastService.show('User deleted successfully', 'success');
+           
+           // Reload to get fresh data and update pagination
            this.loadUsers();
         }
       },

@@ -1,8 +1,13 @@
-<div class="stats-wrapper">
+<div class="loading-overlay" *ngIf="loading">
+  <div class="spinner"></div>
+  <span>Loading dashboard...</span>
+</div>
+
+<div class="stats-wrapper" *ngIf="!loading">
 
   <div class="stat-card">
     <i class="fa-solid fa-users icon"></i>
-    <div class="count">{{ totalUsers }}</div>
+    <div class="count">{{ totalUsers | number }}</div>
     <div class="label">Total Users</div>
   </div>
 
@@ -14,7 +19,7 @@
 
 </div>
 
-<div class="charts-container">
+<div class="charts-container" *ngIf="!loading">
   <!-- Users Pie Chart -->
   <div class="chart-card">
     <h3>Users Distribution</h3>
@@ -38,18 +43,18 @@
         />
       </svg>
       <div class="chart-center">
-        <div class="total">{{ userStats.totalUsers }}</div>
+        <div class="total">{{ userStats.totalUsers | number }}</div>
         <div class="label">Users</div>
       </div>
     </div>
     <div class="legend">
       <div class="legend-item">
         <span class="legend-color active"></span>
-        <span>Active: {{ userStats.activeUsers }} ({{ getUserActivePercentage() }}%)</span>
+        <span>Active: {{ userStats.activeUsers | number }} ({{ getUserActivePercentage() }}%)</span>
       </div>
       <div class="legend-item">
         <span class="legend-color inactive"></span>
-        <span>Inactive: {{ userStats.inactiveUsers }} ({{ getUserInactivePercentage() }}%)</span>
+        <span>Inactive: {{ userStats.inactiveUsers | number }} ({{ getUserInactivePercentage() }}%)</span>
       </div>
     </div>
   </div>

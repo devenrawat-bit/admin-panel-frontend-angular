@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { timeout, catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -12,7 +14,13 @@ export class UserService {
   // ----- USERS -----
 
   getUsers(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/User/get-users`, payload);
+    return this.http.post<any>(`${this.baseUrl}/User/get-users`, payload).pipe(
+      timeout(30000), // 30 second timeout
+      catchError(err => {
+        console.error('API Error or Timeout:', err);
+        return throwError(() => err);
+      })
+    );
   }
 
   getUserById(id: string): Observable<any> {

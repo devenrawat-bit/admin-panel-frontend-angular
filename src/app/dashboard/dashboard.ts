@@ -25,6 +25,9 @@ export class Dashboard {
 
   totalUsers = 0;
   totalRoles = 0;
+  loading = true;
+  loadingUsers = true;
+  loadingRoles = true;
 
   userStats: UserStats = { activeUsers: 0, inactiveUsers: 0, totalUsers: 0 };
   roleStats: RoleStats = { activeRoles: 0, inactiveRoles: 0, totalRoles: 0 };
@@ -32,20 +35,51 @@ export class Dashboard {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.loadStats();
     this.loadUserStats();
     this.loadRoleStats();
   }
 
-  loadStats() {
-    // Don't use count endpoints as they may include deleted records
-    // We'll get the counts from loadUserStats and loadRoleStats instead
+  checkLoadingComplete() {
+    if (!this.loadingUsers && !this.loadingRoles) {
+      this.loading = false;
+    }
   }
 
   loadUserStats() {
+    // Use optimized stats endpoint instead of loading full user data
+    this.http.get<any>('https://localhost:7065/api/User/stats')
+      .subscribe({
+        next: (res) => {
+          console.log('Dashboard User Stats Response:', res);
+          
+          // Handle different response structures
+          const stats = res?.data || res;
+          
+          this.userStats = {
+            activeUsers: stats.activeUsers || stats.ActiveUsers || 0,
+            inactiveUsers: stats.inactiveUsers || stats.InactiveUsers || 0,
+            totalUsers: stats.totalUsers || stats.TotalUsers || 0
+          };
+          
+          this.totalUsers = this.userStats.totalUsers;
+          
+          console.log('User Stats:', this.userStats);
+          this.loadingUsers = false;
+          this.checkLoadingComplete();
+        },
+        error: (err) => {
+          console.error('Error loading user stats:', err);
+          // Fallback to old method if stats endpoint doesn't exist yet
+          this.loadUserStatsLegacy();
+        }
+      });
+  }
+
+  // Fallback method if backend stats endpoint is not ready yet
+  loadUserStatsLegacy() {
     const payload = {
       page: 1,
-      pageSize: 1000,
+      pageSize: 10,
       search: '',
       sortColumn: 'CreatedAt',
       sortDirection: 'desc',
@@ -54,36 +88,39 @@ export class Dashboard {
 
     this.http.post<any>('https://localhost:7065/api/User/get-users', payload)
       .subscribe(res => {
-        console.log('Dashboard User Stats Response:', res);
-        
-        // Extract users from response (same logic as users component)
+        let totalCount = 0;
         let users: any[] = [];
         
         if (res?.message?.data && Array.isArray(res.message.data)) {
           users = res.message.data;
+          totalCount = res.message.totalCount || res.message.totalItems || res.totalItems || 0;
         } else if (res?.data && Array.isArray(res.data)) {
           users = res.data;
+          totalCount = res.totalCount || res.totalItems || 0;
         } else if (res?.Data && Array.isArray(res.Data)) {
           users = res.Data;
+          totalCount = res.TotalCount || res.TotalItems || 0;
         } else if (Array.isArray(res)) {
           users = res;
+          totalCount = res.length;
         }
-        
-        console.log('Extracted users:', users);
         
         const activeUsers = users.filter((u: any) => u.isActive === true).length;
         const inactiveUsers = users.filter((u: any) => u.isActive === false).length;
+        const sampleTotal = users.length;
+        
+        const activePercentage = sampleTotal > 0 ? activeUsers / sampleTotal : 1;
+        const inactivePercentage = sampleTotal > 0 ? inactiveUsers / sampleTotal : 0;
         
         this.userStats = {
-          activeUsers,
-          inactiveUsers,
-          totalUsers: users.length
+          activeUsers: Math.round(totalCount * activePercentage),
+          inactiveUsers: Math.round(totalCount * inactivePercentage),
+          totalUsers: totalCount
         };
         
-        // Update the total users count (excluding deleted users)
-        this.totalUsers = users.length;
-        
-        console.log('User Stats:', this.userStats);
+        this.totalUsers = totalCount;
+        this.loadingUsers = false;
+        this.checkLoadingComplete();
       });
   }
 
@@ -116,10 +153,11 @@ export class Dashboard {
           totalRoles: roles.length
         };
         
-        // Update the total roles count (excluding deleted roles)
         this.totalRoles = roles.length;
         
         console.log('Role Stats:', this.roleStats);
+        this.loadingRoles = false;
+        this.checkLoadingComplete();
       });
   }
 

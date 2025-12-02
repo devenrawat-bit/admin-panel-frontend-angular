@@ -12,7 +12,7 @@
             <th>
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search by title..."
                 [(ngModel)]="searchTitle"
                 (ngModelChange)="onFilterChange()"
               />
@@ -20,7 +20,7 @@
             <th>
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search by key..."
                 [(ngModel)]="searchKey"
                 (ngModelChange)="onFilterChange()"
               />
@@ -28,7 +28,7 @@
             <th>
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search by keyword..."
                 [(ngModel)]="searchMetaKeyword"
                 (ngModelChange)="onFilterChange()"
               />
@@ -70,7 +70,10 @@
 
         <tbody>
           <tr *ngIf="loading">
-            <td colspan="5" class="text-center">Loading...</td>
+            <td colspan="5" class="loading-cell">
+              <div class="spinner"></div>
+              <span>Loading CMS...</span>
+            </td>
           </tr>
 
           <tr *ngIf="!loading && cmsItems.length === 0">

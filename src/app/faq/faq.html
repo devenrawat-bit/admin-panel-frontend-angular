@@ -26,7 +26,7 @@
   </div>
 
   <!-- FAQ Table -->
-  <table class="faq-table" *ngIf="!loading; else loadingTpl">
+  <table class="faq-table">
     <thead>
       <tr>
         <th (click)="sortBy('question')">
@@ -66,15 +66,18 @@
         </td>
       </tr>
 
-      <tr *ngIf="faqs.length === 0">
+      <tr *ngIf="!loading && faqs.length === 0">
         <td colspan="3" class="no-data">No FAQs found</td>
+      </tr>
+
+      <tr *ngIf="loading">
+        <td colspan="3" class="loading-cell">
+          <div class="spinner"></div>
+          <span>Loading FAQs...</span>
+        </td>
       </tr>
     </tbody>
   </table>
-
-  <ng-template #loadingTpl>
-    <div class="loading">Loading FAQs...</div>
-  </ng-template>
 
   <!-- Pagination -->
   <div class="pagination" *ngIf="totalItems > 0">
